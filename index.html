@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>🎨 그림그래프 마법사</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; }
+  body { background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #dbeafe 100%); }
+  
+  /* ---- 반응형 스케일 컨테이너 ---- */
+  #app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(8px, 1.5vw, 20px);
+  }
+  
+  .frame {
+    width: 100%;
+    max-width: 1400px;
+    height: 100%;
+    max-height: 950px;
+    background: #fff;
+    border-radius: clamp(20px, 2.5vw, 36px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 6px solid #fff;
+  }
+  
+  /* ---- 헤더 ---- */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: clamp(10px, 1.5vh, 18px) clamp(16px, 2.5vw, 30px);
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    color: #fff;
+    flex-shrink: 0;
+    transition: background 0.4s;
+  }
+  .header.green { background: linear-gradient(90deg, #059669, #10b981); }
+  .header.orange { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+  .header.pink { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+  .header.blue { background: linear-gradient(90deg, #2563eb, #06b6d4); }
+  
+  .header h1 { font-size: clamp(18px, 2.4vw, 28px); font-weight: 900; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+  .header .sub { font-size: clamp(11px, 1.2vw, 14px); font-weight: 600; opacity: 0.9; margin-top: 2px; }
+  .header-right { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    width: clamp(38px, 4.5vw, 50px); height: clamp(38px, 4.5vw, 50px);
+    border-radius: 50%; background: rgba(255,255,255,0.2); border: none; color: #fff;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(18px, 2.4vw, 24px); transition: all 0.2s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,0.35); transform: scale(1.05); }
+  .icon-btn.off { background: rgba(255,255,255,0.1); opacity: 0.6; }
+  .student-tag { background: rgba(255,255,255,0.25); padding: 6px 14px; border-radius: 20px; font-weight: 800; font-size: clamp(12px, 1.4vw, 16px); }
+  
+  /* ---- 본문 ---- */
+  .body {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: #fafbfc;
+  }
+  .scene { position: absolute; inset: 0; padding: clamp(14px, 2.2vh, 28px) clamp(18px, 2.5vw, 40px); display: flex; flex-direction: column; overflow: hidden; }
+  
+  /* ---- 진행바 ---- */
+  .progress { display: flex; gap: 6px; padding: 10px clamp(18px, 2.5vw, 30px) 0; flex-shrink: 0; }
+  .progress .dot {
+    flex: 1; height: 8px; border-radius: 4px; background: #e5e7eb; transition: all 0.4s;
+  }
+  .progress .dot.active { background: linear-gradient(90deg, #4f46e5, #7c3aed); }
+  .progress .dot.done { background: #10b981; }
+  
+  /* ---- 공통 버튼 ---- */
+  .btn {
+    border: none; cursor: pointer; font-weight: 900; font-family: inherit;
+    transition: all 0.15s; border-radius: 16px;
+    padding: clamp(12px, 1.6vh, 18px) clamp(24px, 3vw, 40px);
+    font-size: clamp(15px, 1.7vw, 20px);
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn:active { transform: translateY(2px) scale(0.98); }
+  .btn-primary { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; box-shadow: 0 6px 0 #3730a3, 0 8px 16px rgba(79,70,229,0.3); }
+  .btn-primary:active { box-shadow: 0 2px 0 #3730a3, 0 4px 8px rgba(79,70,229,0.3); }
+  .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 6px 0 #047857, 0 8px 16px rgba(16,185,129,0.3); }
+  .btn-success:active { box-shadow: 0 2px 0 #047857; }
+  .btn-warn { background: linear-gradient(135deg, #f59e0b, #f97316); color: #fff; box-shadow: 0 6px 0 #c2410c, 0 8px 16px rgba(245,158,11,0.3); }
+  .btn-warn:active { box-shadow: 0 2px 0 #c2410c; }
+  .btn-pink { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; box-shadow: 0 6px 0 #be185d, 0 8px 16px rgba(236,72,153,0.3); }
+  .btn-pink:active { box-shadow: 0 2px 0 #be185d; }
+  .btn-ghost { background: #fff; color: #6b7280; border: 2px solid #e5e7eb; box-shadow: 0 4px 0 #e5e7eb; }
+  .btn-ghost:active { box-shadow: 0 1px 0 #e5e7eb; }
+  
+  /* ---- 인트로 ---- */
+  .intro-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(16px, 2.5vh, 28px); text-align: center; }
+  .intro-emoji { font-size: clamp(70px, 12vh, 130px); animation: bounce 2s infinite; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15)); }
+  @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-15px) rotate(3deg); } }
+  .intro-title { font-size: clamp(28px, 4.5vw, 52px); font-weight: 900; background: linear-gradient(135deg, #4f46e5, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .intro-card { background: linear-gradient(135deg, #fef3c7, #fce7f3); padding: clamp(20px, 3vh, 36px) clamp(24px, 4vw, 50px); border-radius: clamp(20px, 2.5vw, 32px); max-width: 700px; box-shadow: inset 0 0 0 3px #fff; }
+  .intro-card p { font-size: clamp(16px, 2vw, 22px); font-weight: 700; color: #4c1d95; line-height: 1.7; }
+  
+  /* ---- 학생 선택 ---- */
+  .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(120px, 14vw, 160px), 1fr)); gap: clamp(10px, 1.5vw, 16px); padding: clamp(10px, 1.5vh, 20px); overflow-y: auto; align-content: start; }
+  .student-card {
+    background: #fff; border: 4px solid #e0e7ff; border-radius: 20px;
+    padding: clamp(16px, 2vh, 24px) clamp(8px, 1vw, 14px);
+    cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    box-shadow: 0 4px 0 #c7d2fe;
+  }
+  .student-card:hover { transform: translateY(-4px); border-color: #818cf8; }
+  .student-card:active { transform: translateY(0); box-shadow: 0 1px 0 #c7d2fe; }
+  .student-card .avatar { font-size: clamp(32px, 4vw, 44px); }
+  .student-card .num { font-size: clamp(11px, 1.2vw, 13px); color: #6366f1; font-weight: 800; background: #eef2ff; padding: 2px 10px; border-radius: 10px; }
+  .student-card .name { font-size: clamp(15px, 1.7vw, 19px); font-weight: 900; color: #1f2937; }
+  
+  /* ---- 메뉴 카드 ---- */
+  .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 18vw, 200px), 1fr)); gap: clamp(12px, 1.8vw, 20px); width: 100%; max-width: 1100px; margin: 0 auto; }
+  .menu-card {
+    background: #fff; border: 4px solid #fef3c7; border-radius: 24px;
+    padding: clamp(14px, 2vh, 22px) clamp(10px, 1.5vw, 18px);
+    cursor: pointer; transition: all 0.2s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center; position: relative;
+    box-shadow: 0 6px 0 #fde68a;
+  }
+  .menu-card:hover { transform: translateY(-4px); }
+  .menu-card.done { background: linear-gradient(135deg, #dcfce7, #bbf7d0); border-color: #86efac; box-shadow: 0 6px 0 #4ade80; }
+  .menu-card.locked { opacity: 0.5; cursor: not-allowed; }
+  .menu-card .step-num { position: absolute; top: 8px; left: 8px; background: #6366f1; color: #fff; width: clamp(24px, 3vw, 30px); height: clamp(24px, 3vw, 30px); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: clamp(12px, 1.4vw, 15px); }
+  .menu-card.done .step-num { background: #10b981; }
+  .menu-card .check { position: absolute; top: 8px; right: 8px; font-size: clamp(20px, 2.5vw, 26px); }
+  .menu-card .icon-big { font-size: clamp(40px, 5.5vw, 60px); margin-top: 8px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+  .menu-card .title { font-size: clamp(13px, 1.5vw, 17px); font-weight: 900; color: #1f2937; line-height: 1.3; }
+  .menu-card .desc { font-size: clamp(10px, 1.1vw, 12px); font-weight: 700; color: #6b7280; }
+  
+  /* ---- 튜토리얼 박스 ---- */
+  .tutorial {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 3px dashed #f59e0b; border-radius: 16px;
+    padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 22px);
+    margin-bottom: clamp(10px, 1.5vh, 16px);
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .tutorial .lamp { font-size: clamp(24px, 3vw, 32px); flex-shrink: 0; }
+  .tutorial .text { font-size: clamp(13px, 1.5vw, 17px); font-weight: 800; color: #92400e; line-height: 1.4; }
+  
+  /* ---- 표 ---- */
+  .table-wrap { background: #fff; border-radius: 20px; padding: clamp(12px, 2vh, 20px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 2px solid #e0e7ff; overflow: auto; }
+  table.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  table.data-table th, table.data-table td { padding: clamp(8px, 1.4vh, 14px) clamp(6px, 1vw, 12px); text-align: center; font-size: clamp(13px, 1.6vw, 18px); }
+  table.data-table th { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #831843; font-weight: 900; border-bottom: 3px solid #ec4899; }
+  table.data-table th:first-child { border-radius: 12px 0 0 0; }
+  table.data-table th:last-child { border-radius: 0 12px 0 0; }
+  table.data-table td { font-weight: 800; color: #1f2937; border-bottom: 1px solid #f3f4f6; }
+  table.data-table .num-cell { color: #4f46e5; font-size: clamp(16px, 2vw, 22px); font-weight: 900; }
+  table.data-table .input-cell { background: #fef3c7; }
+  table.data-table input.cell-input {
+    width: clamp(50px, 6vw, 70px); padding: 6px; font-size: clamp(15px, 1.8vw, 20px); font-weight: 900; text-align: center;
+    border: 2px solid #f59e0b; border-radius: 10px; background: #fff; font-family: inherit; color: #4f46e5;
+  }
+  table.data-table input.cell-input:focus { outline: none; border-color: #4f46e5; background: #eef2ff; }
+  
+  /* ---- 분류 활동 (drag area) ---- */
+  .classify-wrap { display: flex; gap: clamp(10px, 1.5vw, 16px); flex: 1; min-height: 0; }
+  .classify-source { flex: 0 0 clamp(160px, 18vw, 220px); background: #fff; border-radius: 16px; padding: 12px; border: 3px dashed #cbd5e1; overflow-y: auto; }
+  .classify-source h4 { font-size: clamp(12px, 1.4vw, 15px); font-weight: 900; color: #475569; text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px dashed #e2e8f0; }
+  .source-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+  .source-item {
+    font-size: clamp(20px, 3vw, 32px); padding: 4px;
+    cursor: grab; user-select: none;
+    transition: transform 0.15s;
+  }
+  .source-item:active { cursor: grabbing; transform: scale(1.2); }
+  .source-item.used { opacity: 0.25; pointer-events: none; }
+  
+  .classify-targets { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(6px, 0.8vw, 12px); }
+  .classify-bin {
+    background: #fff; border-radius: 14px; padding: 8px;
+    display: flex; flex-direction: column; align-items: center;
+    border: 3px solid; transition: all 0.2s; min-height: 0;
+  }
+  .classify-bin.drag-over { transform: scale(1.03); background: #fef3c7; }
+  .classify-bin .bin-label { font-size: clamp(11px, 1.3vw, 14px); font-weight: 900; padding: 4px 10px; border-radius: 12px; margin-bottom: 6px; flex-shrink: 0; }
+  .classify-bin .bin-area { flex: 1; width: 100%; display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; padding: 4px 0; overflow-y: auto; min-height: 0; border-top: 2px dashed #e5e7eb; }
+  .classify-bin .bin-area .dropped { font-size: clamp(18px, 2.4vw, 28px); animation: pop 0.3s; }
+  @keyframes pop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  .classify-bin .count { font-size: clamp(11px, 1.3vw, 14px); font-weight: 900; padding: 3px 10px; border-radius: 10px; background: #f3f4f6; color: #374151; flex-shrink: 0; }
+  
+  /* ---- 그래프 (세로 / 가로) ---- */
+  .graph-vert {
+    background: #fff; border-radius: 20px; padding: clamp(10px, 1.5vh, 18px);
+    border: 3px solid #fce7f3;
+    flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  }
+  .graph-vert .gtitle { text-align: center; background: linear-gradient(90deg, #ec4899, #f43f5e); color: #fff; padding: 6px 16px; border-radius: 14px; font-weight: 900; font-size: clamp(12px, 1.4vw, 16px); margin: 0 auto 8px; flex-shrink: 0; }
+  .graph-vert .grid { flex: 1; display: grid; gap: 0; min-height: 0; }
+  .graph-vert .grow { display: contents; }
+  .graph-vert .y-label { background: #fce7f3; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #831843; font-size: clamp(13px, 1.6vw, 17px); border: 1px solid #f9a8d4; }
+  .graph-vert .cell {
+    background: #fff; border: 1px solid #fbcfe8; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(18px, 2.5vw, 28px); user-select: none;
+    transition: all 0.1s;
+  }
+  .graph-vert .cell:hover { background: #fdf2f8; }
+  .graph-vert .cell.filled { background: #fef3c7; }
+  .graph-vert .x-corner { background: #fce7f3; border: 1px solid #f9a8d4; position: relative; }
+  .graph-vert .x-corner::before, .graph-vert .x-corner::after { content: ''; position: absolute; }
+  .graph-vert .x-corner::before { content: '학생수(명)'; font-size: clamp(8px, 0.9vw, 11px); top: 4px; left: 4px; color: #831843; font-weight: 800; }
+  .graph-vert .x-corner::after { content: '동물'; font-size: clamp(9px, 1vw, 12px); bottom: 4px; right: 4px; color: #831843; font-weight: 800; }
+  .graph-vert .x-corner svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .graph-vert .x-label { background: #fce7f3; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #831843; font-size: clamp(11px, 1.4vw, 16px); border: 1px solid #f9a8d4; }
+  
+  /* 가로 그래프 */
+  .graph-horiz { background: #fff; border-radius: 20px; padding: clamp(10px, 1.5vh, 18px); border: 3px solid #d1fae5; flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .graph-horiz .gtitle { text-align: center; background: linear-gradient(90deg, #10b981, #059669); color: #fff; padding: 6px 16px; border-radius: 14px; font-weight: 900; font-size: clamp(12px, 1.4vw, 16px); margin: 0 auto 8px; flex-shrink: 0; }
+  .graph-horiz .grid { flex: 1; display: grid; gap: 0; min-height: 0; }
+  .graph-horiz .y-label { background: #d1fae5; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #064e3b; font-size: clamp(11px, 1.4vw, 16px); border: 1px solid #6ee7b7; }
+  .graph-horiz .cell { background: #fff; border: 1px solid #a7f3d0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: clamp(18px, 2.5vw, 28px); user-select: none; transition: all 0.1s; }
+  .graph-horiz .cell:hover { background: #ecfdf5; }
+  .graph-horiz .cell.filled { background: #fef3c7; color: #ef4444; }
+  .graph-horiz .x-label { background: #d1fae5; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #064e3b; font-size: clamp(13px, 1.6vw, 17px); border: 1px solid #6ee7b7; }
+  .graph-horiz .x-corner { background: #d1fae5; border: 1px solid #6ee7b7; position: relative; }
+  .graph-horiz .x-corner::before { content: '동물'; font-size: clamp(9px, 1vw, 12px); position: absolute; top: 4px; left: 4px; color: #064e3b; font-weight: 800; }
+  .graph-horiz .x-corner::after { content: '학생수(명)'; font-size: clamp(8px, 0.9vw, 11px); position: absolute; bottom: 4px; right: 4px; color: #064e3b; font-weight: 800; }
+  
+  /* ---- 활동 푸터 (목표/체크) ---- */
+  .act-footer { display: flex; align-items: center; gap: clamp(10px, 1.5vw, 16px); padding-top: clamp(10px, 1.5vh, 14px); flex-shrink: 0; }
+  .act-status { flex: 1; background: #fff; padding: clamp(10px, 1.4vh, 14px) clamp(14px, 2vw, 20px); border-radius: 14px; font-weight: 800; font-size: clamp(12px, 1.4vw, 16px); border: 2px solid #e5e7eb; color: #6b7280; display: flex; align-items: center; gap: 10px; }
+  .act-status.ok { background: linear-gradient(90deg, #dcfce7, #bbf7d0); border-color: #86efac; color: #14532d; }
+  .act-status.bad { background: linear-gradient(90deg, #fee2e2, #fecaca); border-color: #fca5a5; color: #7f1d1d; }
+  
+  /* ---- 녹음 화면 ---- */
+  .record-wrap { display: flex; flex-direction: column; gap: clamp(10px, 1.5vh, 16px); flex: 1; min-height: 0; overflow: hidden; }
+  .record-question { background: linear-gradient(135deg, #ede9fe, #ddd6fe); padding: clamp(14px, 2vh, 22px); border-radius: 20px; border: 3px solid #a78bfa; text-align: center; }
+  .record-question h3 { font-size: clamp(15px, 1.8vw, 20px); font-weight: 900; color: #4c1d95; line-height: 1.5; }
+  
+  .record-table { background: #fff; border-radius: 16px; padding: clamp(8px, 1.2vh, 14px); border: 2px solid #c4b5fd; flex-shrink: 0; }
+  .record-table .ttitle { text-align: center; background: #7c3aed; color: #fff; padding: 6px 14px; border-radius: 12px; font-weight: 900; font-size: clamp(11px, 1.3vw, 15px); display: inline-block; margin-bottom: 8px; }
+  .record-table table { width: 100%; }
+  .record-table th, .record-table td { padding: clamp(6px, 1vh, 10px) 6px; text-align: center; font-size: clamp(12px, 1.4vw, 16px); font-weight: 800; }
+  .record-table th { background: #f3e8ff; color: #6b21a8; }
+  .record-table .num-cell { color: #7c3aed; font-size: clamp(15px, 1.8vw, 20px); }
+  
+  .record-control { display: flex; flex-direction: column; align-items: center; gap: clamp(8px, 1.2vh, 12px); flex-shrink: 0; }
+  .mic-btn {
+    width: clamp(70px, 8vw, 100px); height: clamp(70px, 8vw, 100px); border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; cursor: pointer;
+    font-size: clamp(30px, 3.5vw, 44px); transition: all 0.2s;
+    box-shadow: 0 8px 0 #991b1b, 0 12px 24px rgba(239,68,68,0.4);
+  }
+  .mic-btn:hover { transform: translateY(-2px); }
+  .mic-btn.recording { animation: pulse 1.2s infinite; background: linear-gradient(135deg, #f43f5e, #e11d48); }
+  @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 8px 0 #991b1b, 0 0 0 0 rgba(239,68,68,0.5); } 50% { transform: scale(1.08); box-shadow: 0 8px 0 #991b1b, 0 0 0 20px rgba(239,68,68,0); } }
+  .mic-status { font-size: clamp(13px, 1.5vw, 16px); font-weight: 800; color: #6b7280; }
+  .mic-status.live { color: #dc2626; }
+  
+  .record-text-box { background: #fff; border: 3px solid #e0e7ff; border-radius: 16px; padding: clamp(10px, 1.5vh, 16px); min-height: clamp(60px, 8vh, 90px); font-size: clamp(13px, 1.5vw, 17px); font-weight: 700; color: #1f2937; line-height: 1.6; flex: 1; overflow-y: auto; }
+  .record-text-box.empty { color: #9ca3af; font-weight: 600; font-style: italic; display: flex; align-items: center; justify-content: center; }
+  
+  .sample-toggle { background: #fef3c7; border: 2px dashed #f59e0b; padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 800; font-size: clamp(11px, 1.3vw, 14px); color: #92400e; }
+  .sample-content { background: #fefce8; border-left: 4px solid #f59e0b; padding: 10px 14px; border-radius: 8px; font-size: clamp(12px, 1.4vw, 15px); color: #713f12; line-height: 1.5; font-weight: 600; }
+  
+  /* ---- 퀴즈 ---- */
+  .quiz-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(14px, 2.2vh, 24px); padding: 0 clamp(20px, 4vw, 60px); }
+  .quiz-q { background: linear-gradient(135deg, #ddd6fe, #c4b5fd); padding: clamp(18px, 2.8vh, 30px) clamp(20px, 3vw, 36px); border-radius: clamp(20px, 2.5vw, 28px); width: 100%; max-width: 700px; text-align: center; border: 4px solid #a78bfa; }
+  .quiz-q .label { background: #6d28d9; color: #fff; padding: 4px 14px; border-radius: 12px; font-size: clamp(11px, 1.3vw, 14px); font-weight: 900; display: inline-block; margin-bottom: 10px; }
+  .quiz-q .qtext { font-size: clamp(16px, 2vw, 22px); font-weight: 900; color: #4c1d95; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 14px); width: 100%; max-width: 700px; }
+  .quiz-opt {
+    background: #fff; border: 4px solid #e9d5ff; border-radius: 18px;
+    padding: clamp(14px, 2vh, 22px) clamp(18px, 2.5vw, 28px);
+    font-size: clamp(15px, 1.8vw, 19px); font-weight: 900; color: #4c1d95;
+    cursor: pointer; display: flex; align-items: center; gap: 14px; text-align: left;
+    transition: all 0.2s; box-shadow: 0 4px 0 #ddd6fe;
+  }
+  .quiz-opt:hover { border-color: #a78bfa; transform: translateY(-2px); }
+  .quiz-opt:active { transform: translateY(0); box-shadow: 0 1px 0 #ddd6fe; }
+  .quiz-opt .num { width: clamp(32px, 4vw, 42px); height: clamp(32px, 4vw, 42px); background: #ede9fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #6d28d9; flex-shrink: 0; font-size: clamp(14px, 1.6vw, 18px); }
+  
+  /* ---- 자기평가 별 ---- */
+  .stars-row { display: flex; gap: clamp(6px, 1vw, 12px); justify-content: center; }
+  .star-btn { background: none; border: none; cursor: pointer; font-size: clamp(40px, 5vw, 64px); transition: all 0.15s; padding: 4px; filter: grayscale(1) opacity(0.4); }
+  .star-btn.lit { filter: none; transform: scale(1.1); animation: starpop 0.3s; }
+  @keyframes starpop { 0% { transform: scale(0.5); } 60% { transform: scale(1.3); } 100% { transform: scale(1.1); } }
+  
+  /* ---- 결과/수료증 ---- */
+  .cert-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(12px, 2vh, 20px); }
+  .cert {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border: 8px double #f59e0b;
+    padding: clamp(20px, 3vh, 36px) clamp(24px, 4vw, 56px);
+    border-radius: clamp(16px, 2vw, 24px);
+    max-width: 600px; width: 90%; text-align: center;
+    box-shadow: 0 12px 32px rgba(245,158,11,0.25);
+    position: relative;
+  }
+  .cert .seal { position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; transform: rotate(15deg); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .cert h2 { font-size: clamp(24px, 3.5vw, 38px); font-weight: 900; color: #78350f; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .cert .who { font-size: clamp(20px, 2.6vw, 28px); font-weight: 900; color: #1d4ed8; margin: 12px 0; padding: 8px 20px; background: #fff; border-radius: 14px; display: inline-block; }
+  .cert .text { font-size: clamp(13px, 1.6vw, 17px); font-weight: 700; color: #451a03; line-height: 1.7; margin-top: 14px; }
+  .cert .date { font-size: clamp(11px, 1.3vw, 14px); font-weight: 700; color: #92400e; margin-top: 16px; letter-spacing: 0.15em; }
+  
+  /* ---- 학습 전후 비교 ---- */
+  .compare-wrap { flex: 1; display: flex; flex-direction: column; gap: clamp(10px, 1.5vh, 16px); overflow-y: auto; padding: 4px; }
+  .compare-card { background: #fff; border-radius: 16px; padding: clamp(12px, 2vh, 18px); border: 3px solid; }
+  .compare-card.before { border-color: #fca5a5; background: #fef2f2; }
+  .compare-card.after { border-color: #6ee7b7; background: #ecfdf5; }
+  .compare-label { font-size: clamp(12px, 1.4vw, 15px); font-weight: 900; padding: 4px 12px; border-radius: 12px; display: inline-block; margin-bottom: 8px; }
+  .compare-card.before .compare-label { background: #ef4444; color: #fff; }
+  .compare-card.after .compare-label { background: #10b981; color: #fff; }
+  .compare-text { font-size: clamp(13px, 1.5vw, 16px); font-weight: 600; color: #1f2937; line-height: 1.6; }
+  
+  /* ---- 모달 ---- */
+  .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-box { background: #fff; border-radius: 24px; padding: clamp(20px, 3vh, 32px); max-width: 500px; width: 100%; text-align: center; }
+  .modal-emoji { font-size: clamp(50px, 7vw, 80px); margin-bottom: 12px; animation: bounce 1.2s infinite; }
+  .modal-title { font-size: clamp(18px, 2.4vw, 26px); font-weight: 900; margin-bottom: 8px; }
+  .modal-text { font-size: clamp(13px, 1.5vw, 17px); font-weight: 700; line-height: 1.6; color: #4b5563; margin-bottom: 16px; }
+  .modal-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  
+  /* ---- 사용방법 안내 ---- */
+  .help-row { display: flex; gap: 8px; padding: 8px clamp(18px, 2.5vw, 30px); flex-shrink: 0; align-items: center; flex-wrap: wrap; background: #fffbeb; border-bottom: 2px dashed #fde68a; font-size: clamp(11px, 1.2vw, 14px); font-weight: 700; color: #92400e; }
+  
+  /* ---- 로딩 ---- */
+  .loader { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 20px; font-size: clamp(13px, 1.5vw, 17px); font-weight: 800; color: #6366f1; }
+  .spin { width: 28px; height: 28px; border: 4px solid #e0e7ff; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  /* ---- 히든 ---- */
+  .hidden { display: none !important; }
+  
+  /* ---- 모바일 최적화 ---- */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 16px; }
+    .scene { padding: 12px 14px; }
+    .menu-grid { grid-template-columns: repeat(2, 1fr); }
+    .student-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  
+  /* 스크롤바 예쁘게 */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="frame">
+    <!-- 헤더 -->
+    <header class="header" id="hdr">
+      <div>
+        <h1 id="hdr-title"><span>🎨</span><span>그림그래프 마법사</span></h1>
+        <div class="sub" id="hdr-sub">자료를 분류하고 그래프로 나타내요</div>
+      </div>
+      <div class="header-right">
+        <span class="student-tag hidden" id="student-tag"></span>
+        <button class="icon-btn off" id="speaker-btn" title="음성 켜기/끄기">🔇</button>
+        <button class="icon-btn hidden" id="home-btn" title="처음으로">🏠</button>
+      </div>
+    </header>
+    
+    <!-- 진행바 -->
+    <div class="progress hidden" id="progress"></div>
+    
+    <!-- 본문 -->
+    <main class="body">
+      <!-- 동적으로 채워짐 -->
+      <div class="scene" id="scene"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+// ========================
+// ★★★ 설정: 여기에 Apps Script 웹앱 URL을 붙여넣으세요 ★★★
+// ========================
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsVP5Dm5tdoxdyLlRI4Hbx03di58bHmwSP_RI6nxYFq5FuiZNJBOCgNJG-kn0lZyjC/exec';
+
+// ========================
+// Apps Script API 호출 헬퍼
+// ========================
+// CORS preflight를 피하기 위해 text/plain으로 보냄 (Apps Script는 JSON으로 파싱)
+async function callAPI(action, payload = {}) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT')) {
+    console.warn('[API] APPS_SCRIPT_URL이 설정되지 않았어요. 데모 모드로 동작합니다.');
+    return null;
+  }
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'cors',
+      // text/plain으로 보내야 Apps Script가 preflight 없이 받음
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...payload }),
+      redirect: 'follow'
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
+  } catch (err) {
+    console.warn('[API] 호출 실패:', action, err);
+    return null;
+  }
+}
+
+// ========================
+// 전역 상태
+// ========================
+const state = {
+  phase: 'loading',
+  speaker: false,
+  student: null,
+  students: [],
+  problems: null,
+  startTime: Date.now(),
+  
+  // 활동별 완료 상태
+  done: {
+    pre: false,        // 사전 녹음
+    act1: false,       // 분류
+    act2: false,       // 표 완성
+    act3: false,       // 세로 그래프
+    act4: false,       // 가로 그래프
+    act5: false,       // 비교
+    quiz: false,       // 퀴즈
+    post: false,       // 사후 녹음
+  },
+  
+  // 활동 데이터
+  classifyData: {},
+  tableData: {},
+  vertGraph: {},
+  horizGraph: {},
+  
+  // 퀴즈
+  quizIdx: 0,
+  quizAnswers: [],
+  
+  // 녹음
+  preText: '', preAudio: '', preUrl: '',
+  postText: '', postAudio: '', postUrl: '',
+  
+  // 자기평가
+  selfStars: 0,
+  retried: false,
+};
+
+const PHASES = [
+  { key: 'student', label: '학생' },
+  { key: 'pre', label: '시작 말하기' },
+  { key: 'act1', label: '분류' },
+  { key: 'act2', label: '표' },
+  { key: 'act3', label: '세로' },
+  { key: 'act4', label: '가로' },
+  { key: 'act5', label: '비교' },
+  { key: 'quiz', label: '퀴즈' },
+  { key: 'post', label: '마무리 말하기' },
+  { key: 'self', label: '자기평가' },
+  { key: 'cert', label: '수료' },
+];
+
+// ========================
+// 유틸: TTS / 효과음
+// ========================
+function speak(text) {
+  if (!state.speaker || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 1.0;
+  u.pitch = 1.1;
+  const voices = window.speechSynthesis.getVoices();
+  const koVoice = voices.find(v => v.lang === 'ko-KR');
+  if (koVoice) u.voice = koVoice;
+  window.speechSynthesis.speak(u);
+}
+
+function playSound(type) {
+  if (!state.speaker) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    
+    if (type === 'correct') {
+      o.frequency.setValueAtTime(523.25, ctx.currentTime);
+      o.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+      o.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+      g.gain.setValueAtTime(0.3, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+      o.start(); o.stop(ctx.currentTime + 0.4);
+    } else if (type === 'wrong') {
+      o.frequency.setValueAtTime(300, ctx.currentTime);
+      o.frequency.setValueAtTime(200, ctx.currentTime + 0.15);
+      g.gain.setValueAtTime(0.25, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      o.start(); o.stop(ctx.currentTime + 0.3);
+    } else if (type === 'pop') {
+      o.frequency.setValueAtTime(800, ctx.currentTime);
+      g.gain.setValueAtTime(0.15, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      o.start(); o.stop(ctx.currentTime + 0.1);
+    } else if (type === 'cheer') {
+      [523, 659, 784, 1047].forEach((f, i) => {
+        const oo = ctx.createOscillator();
+        const gg = ctx.createGain();
+        oo.connect(gg); gg.connect(ctx.destination);
+        oo.frequency.setValueAtTime(f, ctx.currentTime + i * 0.1);
+        gg.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.1);
+        gg.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.1 + 0.2);
+        oo.start(ctx.currentTime + i * 0.1);
+        oo.stop(ctx.currentTime + i * 0.1 + 0.2);
+      });
+    }
+  } catch (e) {}
+}
+
+// ========================
+// 헤더 / 진행바 업데이트
+// ========================
+function updateHeader(title, sub, color) {
+  document.getElementById('hdr-title').innerHTML = `<span>${title.split(' ')[0] || '🎨'}</span><span>${title.split(' ').slice(1).join(' ') || title}</span>`;
+  document.getElementById('hdr-sub').textContent = sub || '';
+  const hdr = document.getElementById('hdr');
+  hdr.className = 'header ' + (color || '');
+}
+
+function updateProgress() {
+  const bar = document.getElementById('progress');
+  if (state.phase === 'loading' || state.phase === 'intro' || state.phase === 'student') {
+    bar.classList.add('hidden');
+    return;
+  }
+  bar.classList.remove('hidden');
+  const idx = PHASES.findIndex(p => p.key === state.phase);
+  bar.innerHTML = PHASES.slice(1).map((p, i) => {
+    const active = i === idx - 1;
+    const done = i < idx - 1 || state.done[p.key];
+    return `<div class="dot ${active ? 'active' : ''} ${done ? 'done' : ''}"></div>`;
+  }).join('');
+}
+
+function updateStudentTag() {
+  const tag = document.getElementById('student-tag');
+  if (state.student) {
+    tag.classList.remove('hidden');
+    tag.textContent = `👤 ${state.student.name}`;
+  } else {
+    tag.classList.add('hidden');
+  }
+  document.getElementById('home-btn').classList.toggle('hidden', !state.student || state.phase === 'cert');
+}
+
+// ========================
+// 이모지 매핑
+// ========================
+const ITEM_EMOJI = {
+  '개': '🐶', '앵무새': '🦜', '고양이': '🐱', '토끼': '🐰', '금붕어': '🐠',
+  '사과': '🍎', '바나나': '🍌', '딸기': '🍓', '포도': '🍇', '수박': '🍉',
+  '박물관': '🏛️', '놀이공원': '🎢', '동물원': '🦁', '농장': '🚜',
+  '튤립': '🌷', '안개꽃': '🌸', '장미꽃': '🌹', '해바라기': '🌻', '나팔꽃': '💐',
+  '땅따먹기': '🦶', '공기놀이': '🎯', '보드게임': '🎲', '딱지치기': '🟦',
+  '맑음': '☀️', '흐림': '☁️', '비': '🌧️', '눈': '❄️',
+  '분홍': '💗', '노랑': '💛', '파랑': '💙', '초록': '💚', '보라': '💜'
+};
+
+function getEmoji(item) {
+  return ITEM_EMOJI[item] || '⭐';
+}
+
+// ========================
+// 초기 로딩
+// ========================
+async function init() {
+  document.getElementById('speaker-btn').addEventListener('click', toggleSpeaker);
+  document.getElementById('home-btn').addEventListener('click', goHome);
+  
+  renderLoading();
+  
+  // 한 번에 학생+문제 받아오기
+  const data = await callAPI('getInitData');
+  
+  if (data && !data.error) {
+    state.problems = data.problems;
+    state.students = data.students || [];
+  } else {
+    // API 실패시 기본값
+    setDefaultData();
+  }
+  
+  renderIntro();
+}
+
+function setDefaultData() {
+  state.problems = {
+    pre: { 
+      question: '표를 보고 알 수 있는 것을 자유롭게 말해보세요.', 
+      title: '좋아하는 과일별 학생 수', 
+      items: ['사과','바나나','딸기','포도','수박'], 
+      values: [7,5,8,3,2], 
+      unit: '명', 
+      sample: '예: "딸기를 좋아하는 학생이 8명으로 가장 많아요. 수박은 2명으로 가장 적어요. 우리 반은 모두 25명이에요."'
+    },
+    activity: { 
+      title: '수찬이네 반 학생들이 좋아하는 동물별 학생 수', 
+      items: ['개','앵무새','고양이','토끼','금붕어'], 
+      values: [6,3,5,2,4], 
+      unit: '명' 
+    },
+    post: { 
+      question: '그래프를 보고 알 수 있는 것을 자유롭게 말해보세요.', 
+      title: '가 보고 싶은 체험 학습 장소별 학생 수', 
+      items: ['박물관','놀이공원','동물원','농장'], 
+      values: [4,10,8,2], 
+      unit: '명', 
+      sample: '예: "놀이공원이 10명으로 가장 많아요. 농장은 2명으로 가장 적어요. 그래프가 한눈에 비교하기 쉬워요."'
+    },
+    quizzes: [
+      { q: '그래프에서 가장 많은 항목을 한눈에 알 수 있는 곳은?', options: ['○가 가장 높이 쌓인 곳', '○가 가장 적은 곳'], ans: 1, desc: '맞아요! ○가 가장 높이 쌓인 곳이 가장 많은 항목이에요.' },
+      { q: '표와 그래프 중 한눈에 비교하기 더 좋은 것은?', options: ['숫자가 적힌 표', '그림이 그려진 그래프'], ans: 2, desc: '딩동댕! 그래프는 그림의 높이만 봐도 누가 가장 많은지 한눈에 알 수 있어요!' },
+      { q: '그래프를 그릴 때 한 칸에는 ○를 몇 개 그릴까요?', options: ['한 개', '두 개'], ans: 1, desc: '정답이에요! 한 칸에는 ○를 한 개씩만 그려야 정확하게 비교할 수 있어요.' }
+    ]
+  };
+  state.students = [
+    {num:1,name:'김민준'},{num:2,name:'이서윤'},{num:3,name:'박지호'},
+    {num:4,name:'최서연'},{num:5,name:'정도윤'},{num:6,name:'강하은'},
+    {num:7,name:'조시우'},{num:8,name:'윤예린'},{num:9,name:'임주원'},{num:10,name:'한지아'}
+  ];
+}
+
+function toggleSpeaker() {
+  state.speaker = !state.speaker;
+  const btn = document.getElementById('speaker-btn');
+  if (state.speaker) {
+    btn.textContent = '🔊';
+    btn.classList.remove('off');
+    speak('음성을 켰어요!');
+  } else {
+    btn.textContent = '🔇';
+    btn.classList.add('off');
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
+}
+
+function goHome() {
+  if (confirm('처음으로 돌아갈까요? 진행 상황이 사라져요.')) {
+    Object.keys(state.done).forEach(k => state.done[k] = false);
+    state.student = null;
+    state.classifyData = {};
+    state.tableData = {};
+    state.vertGraph = {};
+    state.horizGraph = {};
+    state.quizIdx = 0;
+    state.quizAnswers = [];
+    state.preText = ''; state.postText = '';
+    state.selfStars = 0;
+    state.startTime = Date.now();
+    renderIntro();
+  }
+}
+
+// ========================
+// 화면: 로딩
+// ========================
+function renderLoading() {
+  state.phase = 'loading';
+  updateHeader('🎨 그림그래프 마법사', '준비하는 중이에요...', '');
+  updateProgress();
+  document.getElementById('scene').innerHTML = `
+    <div class="intro-center">
+      <div class="intro-emoji">🎨</div>
+      <div class="loader"><div class="spin"></div>준비하는 중이에요...</div>
+    </div>
+  `;
+}
+
+// ========================
+// 화면: 인트로
+// ========================
+function renderIntro() {
+  state.phase = 'intro';
+  updateHeader('🎨 그림그래프 마법사', '자료를 분류하고 그래프로 나타내요', '');
+  updateStudentTag();
+  updateProgress();
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="intro-center">
+      <div class="intro-emoji">🎨</div>
+      <h2 class="intro-title">그림그래프 마법사</h2>
+      <div class="intro-card">
+        <p>📊 표와 그래프로 자료를 정리해요!<br>
+        🎯 직접 만들고 비교하면서 그림그래프 박사가 되어보아요!</p>
+      </div>
+      <button class="btn btn-primary" id="start-btn">
+        <span>🚀</span> 시작하기
+      </button>
+    </div>
+  `;
+  document.getElementById('start-btn').addEventListener('click', renderStudentSelect);
+  speak('안녕하세요! 그림그래프 마법사예요. 시작하기 버튼을 눌러주세요.');
+}
+
+// ========================
+// 화면: 학생 선택
+// ========================
+function renderStudentSelect() {
+  state.phase = 'student';
+  updateHeader('👋 친구를 골라봐요', '내 이름을 찾아 눌러주세요', 'pink');
+  updateStudentTag();
+  updateProgress();
+  
+  const avatars = ['🦊','🐻','🐼','🐯','🦁','🐸','🐵','🐨','🐰','🐹','🦄','🐙','🐳','🦋','🌟'];
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">자기 이름을 찾아 눌러주세요. 이름이 없다면 선생님께 말씀해주세요!</div>
+    </div>
+    <div class="student-grid" id="student-grid">
+      ${state.students.length === 0 
+        ? '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;font-weight:800">학생 명단이 비어있어요. 시트에서 등록해주세요.</div>'
+        : state.students.map((s, i) => `
+        <div class="student-card" data-num="${s.num}" data-name="${s.name}">
+          <div class="avatar">${avatars[i % avatars.length]}</div>
+          <div class="num">${s.num}번</div>
+          <div class="name">${s.name}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  
+  document.querySelectorAll('.student-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const num = card.dataset.num;
+      const name = card.dataset.name;
+      state.student = { num, name };
+      playSound('pop');
+      renderPreRecord();
+    });
+  });
+  speak('내 이름을 찾아주세요!');
+}
+
+// ========================
+// 화면: 사전 녹음
+// ========================
+function renderPreRecord() {
+  state.phase = 'pre';
+  updateHeader('🎤 시작 말하기', '표를 보고 자유롭게 말해보세요', 'orange');
+  updateStudentTag();
+  updateProgress();
+  
+  const p = state.problems.pre;
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">아래 표를 보고 알 수 있는 것을 마이크 버튼을 눌러 말해보세요. 학습 후에 다시 한 번 더 말해볼 거예요!</div>
+    </div>
+    <div class="record-wrap">
+      <div class="record-question">
+        <h3>${p.question}</h3>
+      </div>
+      <div class="record-table">
+        <div style="text-align:center;"><span class="ttitle">${p.title}</span></div>
+        <table>
+          <thead><tr>
+            <th>항목</th>
+            ${p.items.map(it => `<th>${getEmoji(it)} ${it}</th>`).join('')}
+            <th>합계</th>
+          </tr></thead>
+          <tbody><tr>
+            <td>학생 수(${p.unit})</td>
+            ${p.values.map(v => `<td class="num-cell">${v}</td>`).join('')}
+            <td class="num-cell">${p.values.reduce((a,b)=>a+b,0)}</td>
+          </tr></tbody>
+        </table>
+      </div>
+      
+      <div class="record-control">
+        <button class="mic-btn" id="mic-btn">🎤</button>
+        <div class="mic-status" id="mic-status">마이크 버튼을 눌러 시작해요</div>
+      </div>
+      
+      <div class="record-text-box empty" id="rec-text">여기에 말한 내용이 적혀요</div>
+      
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
+        <button class="sample-toggle" id="sample-btn">💡 예시 답안 보기</button>
+        <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">
+          말하기 끝! 다음으로 <span>➡️</span>
+        </button>
+      </div>
+      <div id="sample-area"></div>
+    </div>
+  `;
+  
+  setupRecording('pre');
+  
+  document.getElementById('sample-btn').addEventListener('click', () => {
+    const area = document.getElementById('sample-area');
+    if (area.innerHTML) {
+      area.innerHTML = '';
+    } else {
+      area.innerHTML = `<div class="sample-content">${p.sample || '예시 답안이 없어요.'}</div>`;
+      speak(p.sample || '');
+    }
+  });
+  
+  document.getElementById('next-btn').addEventListener('click', () => {
+    state.done.pre = true;
+    saveRecordingToServer('사전');
+    renderActivity1();
+  });
+  
+  speak('표를 보고 알 수 있는 것을 자유롭게 말해보세요. 마이크 버튼을 눌러주세요.');
+}
+
+// ========================
+// 녹음 기능 셋업
+// ========================
+function setupRecording(type) {
+  const micBtn = document.getElementById('mic-btn');
+  const status = document.getElementById('mic-status');
+  const textBox = document.getElementById('rec-text');
+  const nextBtn = document.getElementById('next-btn');
+  
+  let recognition = null;
+  let isRecording = false;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  
+  // Web Speech API
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SR) {
+    recognition = new SR();
+    recognition.lang = 'ko-KR';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    let finalText = '';
+    recognition.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalText += e.results[i][0].transcript + ' ';
+        } else {
+          interim += e.results[i][0].transcript;
+        }
+      }
+      const display = finalText + interim;
+      if (display.trim()) {
+        textBox.classList.remove('empty');
+        textBox.textContent = display;
+      }
+      if (type === 'pre') state.preText = finalText.trim();
+      else state.postText = finalText.trim();
+    };
+    
+    recognition.onerror = (e) => {
+      console.warn('Recognition error:', e.error);
+      if (e.error === 'not-allowed') {
+        status.textContent = '⚠️ 마이크 권한을 허용해주세요';
+        isRecording = false;
+        micBtn.classList.remove('recording');
+      }
+    };
+    
+    recognition.onend = () => {
+      if (isRecording) {
+        try { recognition.start(); } catch(e) {}
+      }
+    };
+  }
+  
+  micBtn.addEventListener('click', async () => {
+    if (!isRecording) {
+      // 시작
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result.split(',')[1];
+            if (type === 'pre') state.preAudio = base64;
+            else state.postAudio = base64;
+            // 오디오 준비 완료 후 다음 버튼 활성화
+            const text = (type === 'pre' ? state.preText : state.postText) || textBox.textContent;
+            if (text && text.trim().length > 0) {
+              nextBtn.disabled = false;
+              nextBtn.style.opacity = '1';
+            }
+          };
+          reader.readAsDataURL(blob);
+          stream.getTracks().forEach(t => t.stop());
+        };
+        mediaRecorder.start();
+        if (recognition) {
+          try { recognition.start(); } catch(e) {}
+        }
+        isRecording = true;
+        micBtn.classList.add('recording');
+        micBtn.textContent = '⏹️';
+        status.textContent = '🔴 녹음 중... 말해주세요!';
+        status.classList.add('live');
+        textBox.classList.remove('empty');
+        textBox.textContent = '';
+      } catch (err) {
+        status.textContent = '⚠️ 마이크를 사용할 수 없어요. 권한을 확인해주세요.';
+      }
+    } else {
+      // 종료
+      isRecording = false;
+      if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+      }
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+      micBtn.classList.remove('recording');
+      micBtn.textContent = '🎤';
+      status.textContent = '✅ 녹음 끝! 다시 누르면 다시 녹음해요';
+      status.classList.remove('live');
+      
+      // 텍스트만 있어도 일단 활성화 (오디오는 onloadend에서 추가 활성화)
+      const text = (type === 'pre' ? state.preText : state.postText) || textBox.textContent;
+      if (text && text.trim().length > 0) {
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = '1';
+      }
+    }
+  });
+}
+
+async function saveRecordingToServer(typeKor) {
+  const text = typeKor === '사전' ? state.preText : state.postText;
+  const audio = typeKor === '사전' ? state.preAudio : state.postAudio;
+  
+  const res = await callAPI('saveRecording', {
+    studentNum: state.student.num,
+    studentName: state.student.name,
+    type: typeKor,
+    text: text || '',
+    audioBase64: audio || ''
+  });
+  
+  if (res && res.fileUrl) {
+    if (typeKor === '사전') state.preUrl = res.fileUrl;
+    else state.postUrl = res.fileUrl;
+  }
+}
+
+// ========================
+// 활동 1: 분류하기
+// ========================
+function renderActivity1() {
+  state.phase = 'act1';
+  updateHeader('🎯 활동 1: 분류하기', '같은 종류끼리 쌓아보세요', 'blue');
+  updateStudentTag();
+  updateProgress();
+  
+  const a = state.problems.activity;
+  // 무작위 순서로 동물 이미지들을 만듦
+  const sourceItems = [];
+  a.items.forEach((it, idx) => {
+    for (let i = 0; i < a.values[idx]; i++) {
+      sourceItems.push({ id: `${it}-${i}`, item: it });
+    }
+  });
+  // 셔플
+  for (let i = sourceItems.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [sourceItems[i], sourceItems[j]] = [sourceItems[j], sourceItems[i]];
+  }
+  
+  state.classifyData = {};
+  a.items.forEach(it => state.classifyData[it] = 0);
+  
+  const colors = [
+    { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
+    { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' },
+    { bg: '#fce7f3', border: '#ec4899', text: '#9f1239' },
+    { bg: '#dcfce7', border: '#10b981', text: '#065f46' },
+    { bg: '#ede9fe', border: '#8b5cf6', text: '#5b21b6' },
+  ];
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">왼쪽의 동물들을 종류별로 같은 자리에 끌어다 놓아주세요! (또는 클릭해도 자동으로 분류돼요)</div>
+    </div>
+    <div class="classify-wrap">
+      <div class="classify-source">
+        <h4>🎲 섞여있는 동물들</h4>
+        <div class="source-items" id="source-items">
+          ${sourceItems.map(s => `<div class="source-item" draggable="true" data-id="${s.id}" data-item="${s.item}">${getEmoji(s.item)}</div>`).join('')}
+        </div>
+      </div>
+      <div class="classify-targets">
+        ${a.items.map((it, idx) => {
+          const c = colors[idx % colors.length];
+          return `
+            <div class="classify-bin" data-item="${it}" style="border-color:${c.border}">
+              <div class="bin-label" style="background:${c.bg};color:${c.text}">${getEmoji(it)} ${it}</div>
+              <div class="bin-area" data-item="${it}"></div>
+              <div class="count" data-item="${it}">0개</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+    <div class="act-footer">
+      <div class="act-status" id="act-status">왼쪽 동물을 알맞은 자리로 끌어다 놓아주세요</div>
+      <button class="btn btn-success" id="check-btn">
+        다 분류했어요 <span>✅</span>
+      </button>
+    </div>
+  `;
+  
+  setupClassifyDnD();
+  
+  document.getElementById('check-btn').addEventListener('click', () => {
+    const a = state.problems.activity;
+    let allCorrect = true;
+    let total = 0;
+    a.items.forEach((it, i) => {
+      total += state.classifyData[it];
+      if (state.classifyData[it] !== a.values[i]) allCorrect = false;
+    });
+    
+    const expectedTotal = a.values.reduce((s, v) => s + v, 0);
+    const status = document.getElementById('act-status');
+    
+    if (total < expectedTotal) {
+      status.textContent = `⚠️ 아직 분류하지 않은 동물이 있어요! (${total}/${expectedTotal})`;
+      status.className = 'act-status bad';
+      playSound('wrong');
+      speak('아직 분류하지 않은 동물이 있어요.');
+    } else if (allCorrect) {
+      status.textContent = '🎉 완벽해요! 모두 잘 분류했어요!';
+      status.className = 'act-status ok';
+      state.done.act1 = true;
+      playSound('correct');
+      speak('완벽해요! 모두 잘 분류했어요!');
+      // 다음 단계 자동 진행
+      setTimeout(() => renderActivity2(), 1500);
+    } else {
+      status.textContent = '😅 다시 한 번 확인해보세요!';
+      status.className = 'act-status bad';
+      playSound('wrong');
+    }
+  });
+  
+  speak('동물들을 종류별로 분류해보세요!');
+}
+
+function setupClassifyDnD() {
+  const a = state.problems.activity;
+  
+  document.querySelectorAll('.source-item').forEach(item => {
+    // 드래그
+    item.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', JSON.stringify({
+        id: item.dataset.id, item: item.dataset.item
+      }));
+    });
+    // 클릭하면 자동으로 알맞은 자리로
+    item.addEventListener('click', () => {
+      if (item.classList.contains('used')) return;
+      const itName = item.dataset.item;
+      placeItem(itName, item.dataset.id);
+      item.classList.add('used');
+      playSound('pop');
+    });
+  });
+  
+  document.querySelectorAll('.classify-bin').forEach(bin => {
+    bin.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      bin.classList.add('drag-over');
+    });
+    bin.addEventListener('dragleave', () => bin.classList.remove('drag-over'));
+    bin.addEventListener('drop', (e) => {
+      e.preventDefault();
+      bin.classList.remove('drag-over');
+      const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+      const targetItem = bin.dataset.item;
+      
+      const sourceEl = document.querySelector(`.source-item[data-id="${data.id}"]`);
+      
+      if (data.item === targetItem) {
+        // 정답
+        placeItem(targetItem, data.id);
+        if (sourceEl) sourceEl.classList.add('used');
+        playSound('correct');
+      } else {
+        // 오답 - 흔들림
+        bin.style.animation = 'shake 0.4s';
+        setTimeout(() => bin.style.animation = '', 400);
+        playSound('wrong');
+        document.getElementById('act-status').textContent = `❌ ${data.item}의 자리가 아니에요!`;
+      }
+    });
+  });
+}
+
+function placeItem(itName, id) {
+  const area = document.querySelector(`.bin-area[data-item="${itName}"]`);
+  if (!area) return;
+  const span = document.createElement('span');
+  span.className = 'dropped';
+  span.textContent = getEmoji(itName);
+  area.appendChild(span);
+  state.classifyData[itName] = (state.classifyData[itName] || 0) + 1;
+  document.querySelector(`.count[data-item="${itName}"]`).textContent = state.classifyData[itName] + '개';
+}
+
+// ========================
+// 활동 2: 표 완성하기
+// ========================
+function renderActivity2() {
+  state.phase = 'act2';
+  updateHeader('📋 활동 2: 표 완성하기', '분류한 결과를 표에 적어보세요', 'blue');
+  updateStudentTag();
+  updateProgress();
+  
+  const a = state.problems.activity;
+  state.tableData = {};
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">앞에서 분류한 동물의 수를 아래 표 빈칸에 적어보세요. 합계도 잊지 마세요!</div>
+    </div>
+    <div style="flex:1; display:flex; align-items:center; justify-content:center; padding:clamp(10px,2vh,20px);">
+      <div class="table-wrap" style="max-width:900px; width:100%;">
+        <h3 style="text-align:center; font-size:clamp(15px,1.8vw,20px); font-weight:900; color:#831843; margin-bottom:14px;">${a.title}</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>동물</th>
+              ${a.items.map(it => `<th>${getEmoji(it)}<br>${it}</th>`).join('')}
+              <th>합계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>학생 수(명)</td>
+              ${a.items.map((it, i) => `
+                <td class="input-cell">
+                  <input type="number" min="0" max="50" class="cell-input" data-item="${it}" placeholder="?">
+                </td>
+              `).join('')}
+              <td class="input-cell">
+                <input type="number" min="0" max="100" class="cell-input" data-item="__sum" placeholder="?">
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="act-footer">
+      <div class="act-status" id="act-status">분류한 동물 수를 빈칸에 적어주세요</div>
+      <button class="btn btn-success" id="check-btn">정답 확인 <span>✅</span></button>
+    </div>
+  `;
+  
+  document.getElementById('check-btn').addEventListener('click', () => {
+    let allCorrect = true;
+    a.items.forEach((it, i) => {
+      const inp = document.querySelector(`.cell-input[data-item="${it}"]`);
+      const v = parseInt(inp.value);
+      if (v !== a.values[i]) {
+        allCorrect = false;
+        inp.style.borderColor = '#ef4444';
+        inp.style.background = '#fef2f2';
+      } else {
+        inp.style.borderColor = '#10b981';
+        inp.style.background = '#dcfce7';
+      }
+    });
+    const sumInp = document.querySelector('.cell-input[data-item="__sum"]');
+    const expectedSum = a.values.reduce((s,v)=>s+v,0);
+    if (parseInt(sumInp.value) !== expectedSum) {
+      allCorrect = false;
+      sumInp.style.borderColor = '#ef4444';
+      sumInp.style.background = '#fef2f2';
+    } else {
+      sumInp.style.borderColor = '#10b981';
+      sumInp.style.background = '#dcfce7';
+    }
+    
+    const status = document.getElementById('act-status');
+    if (allCorrect) {
+      status.textContent = '🎉 표를 완벽하게 완성했어요!';
+      status.className = 'act-status ok';
+      state.done.act2 = true;
+      playSound('correct');
+      speak('표를 완벽하게 완성했어요!');
+      setTimeout(() => renderActivity3(), 1500);
+    } else {
+      status.textContent = '😅 빨간색 칸의 숫자를 다시 확인해보세요!';
+      status.className = 'act-status bad';
+      playSound('wrong');
+    }
+  });
+  
+  speak('분류한 동물 수를 표에 적어주세요.');
+}
+
+// ========================
+// 활동 3: 세로 그래프 그리기
+// ========================
+function renderActivity3() {
+  state.phase = 'act3';
+  updateHeader('📊 활동 3: 세로 그래프', '○를 그려 그래프를 완성해요', 'pink');
+  updateStudentTag();
+  updateProgress();
+  
+  const a = state.problems.activity;
+  state.vertGraph = {};
+  a.items.forEach(it => state.vertGraph[it] = 0);
+  
+  const maxVal = Math.max(...a.values);
+  // y축 (위에서 아래로 maxVal..1)
+  const yLabels = [];
+  for (let y = maxVal; y >= 1; y--) yLabels.push(y);
+  
+  const cols = 1 + a.items.length; // y축 라벨 + 항목들
+  const rows = maxVal + 1; // 셀 + x축 라벨
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">아래 칸을 클릭해서 ○를 그려주세요! 한 칸에 ○ 한 개씩, 아래부터 빈틈없이 채우는 게 규칙이에요.</div>
+    </div>
+    <div class="graph-vert" id="graph-area">
+      <div class="gtitle">${a.title}</div>
+      <div class="grid" id="grid" style="grid-template-columns: clamp(40px, 5vw, 60px) repeat(${a.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 1fr) clamp(40px, 5vh, 60px);">
+        ${yLabels.map((y, ri) => `
+          <div class="y-label">${y}</div>
+          ${a.items.map(it => `<div class="cell" data-item="${it}" data-row="${y}"></div>`).join('')}
+        `).join('')}
+        <div class="x-corner"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="0" x2="100" y2="100" stroke="#ec4899" stroke-width="2"/></svg></div>
+        ${a.items.map(it => `<div class="x-label">${getEmoji(it)}<br>${it}</div>`).join('')}
+      </div>
+    </div>
+    <div class="act-footer">
+      <div class="act-status" id="act-status">표의 숫자만큼 ○를 그려주세요</div>
+      <button class="btn btn-warn" id="reset-btn">🔄 지우기</button>
+      <button class="btn btn-success" id="check-btn">완성! <span>✅</span></button>
+    </div>
+  `;
+  
+  // 셀 클릭 이벤트
+  document.querySelectorAll('.graph-vert .cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const it = cell.dataset.item;
+      const row = parseInt(cell.dataset.row);
+      const cur = state.vertGraph[it] || 0;
+      
+      if (cell.classList.contains('filled')) {
+        // 이미 채워진 셀: 그 셀 위에 있는 것들도 함께 지움
+        for (let r = row; r <= cur; r++) {
+          const c = document.querySelector(`.graph-vert .cell[data-item="${it}"][data-row="${r}"]`);
+          if (c) { c.classList.remove('filled'); c.textContent = ''; }
+        }
+        state.vertGraph[it] = row - 1;
+      } else {
+        // 새로 채우기: 1부터 row까지 모두 채움
+        for (let r = 1; r <= row; r++) {
+          const c = document.querySelector(`.graph-vert .cell[data-item="${it}"][data-row="${r}"]`);
+          if (c && !c.classList.contains('filled')) {
+            c.classList.add('filled');
+            c.textContent = '○';
+            c.style.color = '#ec4899';
+            c.style.fontWeight = '900';
+          }
+        }
+        state.vertGraph[it] = row;
+        playSound('pop');
+      }
+    });
+  });
+  
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    document.querySelectorAll('.graph-vert .cell.filled').forEach(c => {
+      c.classList.remove('filled'); c.textContent = '';
+    });
+    a.items.forEach(it => state.vertGraph[it] = 0);
+  });
+  
+  document.getElementById('check-btn').addEventListener('click', () => {
+    let allCorrect = true;
+    a.items.forEach((it, i) => {
+      if (state.vertGraph[it] !== a.values[i]) allCorrect = false;
+    });
+    const status = document.getElementById('act-status');
+    if (allCorrect) {
+      status.textContent = '🎉 완벽한 세로 그래프예요!';
+      status.className = 'act-status ok';
+      state.done.act3 = true;
+      playSound('correct');
+      speak('완벽한 세로 그래프예요!');
+      setTimeout(() => renderActivity4(), 1500);
+    } else {
+      status.textContent = '😅 표의 숫자와 다시 비교해보세요!';
+      status.className = 'act-status bad';
+      playSound('wrong');
+    }
+  });
+  
+  speak('표의 숫자만큼 동그라미를 그려보세요!');
+}
+
+// ========================
+// 활동 4: 가로 그래프 그리기 (✕ 사용)
+// ========================
+function renderActivity4() {
+  state.phase = 'act4';
+  updateHeader('📊 활동 4: 가로 그래프', '이번엔 ✕로 가로로 그려요', 'green');
+  updateStudentTag();
+  updateProgress();
+  
+  const a = state.problems.activity;
+  state.horizGraph = {};
+  a.items.forEach(it => state.horizGraph[it] = 0);
+  
+  const maxVal = Math.max(...a.values);
+  // 항목 순서 거꾸로 (위에서 아래로 마지막->첫번째)
+  const reversedItems = [...a.items].reverse();
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">이번에는 가로로! 동물 이름이 왼쪽에 있고, 학생 수가 아래에 있어요. ✕ 표시로 칸을 채워주세요!</div>
+    </div>
+    <div class="graph-horiz" id="graph-area">
+      <div class="gtitle">${a.title}</div>
+      <div class="grid" id="grid" style="grid-template-columns: clamp(60px, 8vw, 100px) repeat(${maxVal}, 1fr); grid-template-rows: repeat(${a.items.length}, 1fr) clamp(35px, 4.5vh, 50px);">
+        ${reversedItems.map(it => `
+          <div class="y-label">${getEmoji(it)} ${it}</div>
+          ${Array.from({length: maxVal}, (_, i) => i+1).map(col => `
+            <div class="cell" data-item="${it}" data-col="${col}"></div>
+          `).join('')}
+        `).join('')}
+        <div class="x-corner"></div>
+        ${Array.from({length: maxVal}, (_, i) => i+1).map(c => `<div class="x-label">${c}</div>`).join('')}
+      </div>
+    </div>
+    <div class="act-footer">
+      <div class="act-status" id="act-status">표의 숫자만큼 ✕를 그려주세요 (왼쪽부터!)</div>
+      <button class="btn btn-warn" id="reset-btn">🔄 지우기</button>
+      <button class="btn btn-success" id="check-btn">완성! <span>✅</span></button>
+    </div>
+  `;
+  
+  document.querySelectorAll('.graph-horiz .cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const it = cell.dataset.item;
+      const col = parseInt(cell.dataset.col);
+      const cur = state.horizGraph[it] || 0;
+      
+      if (cell.classList.contains('filled')) {
+        // 그 칸 이상 모두 지움
+        for (let c = col; c <= cur; c++) {
+          const cc = document.querySelector(`.graph-horiz .cell[data-item="${it}"][data-col="${c}"]`);
+          if (cc) { cc.classList.remove('filled'); cc.textContent = ''; }
+        }
+        state.horizGraph[it] = col - 1;
+      } else {
+        // 1부터 col까지 모두 채움
+        for (let c = 1; c <= col; c++) {
+          const cc = document.querySelector(`.graph-horiz .cell[data-item="${it}"][data-col="${c}"]`);
+          if (cc && !cc.classList.contains('filled')) {
+            cc.classList.add('filled');
+            cc.textContent = '✕';
+            cc.style.fontWeight = '900';
+          }
+        }
+        state.horizGraph[it] = col;
+        playSound('pop');
+      }
+    });
+  });
+  
+  document.getElementById('reset-btn').addEventListener('click', () => {
+    document.querySelectorAll('.graph-horiz .cell.filled').forEach(c => {
+      c.classList.remove('filled'); c.textContent = '';
+    });
+    a.items.forEach(it => state.horizGraph[it] = 0);
+  });
+  
+  document.getElementById('check-btn').addEventListener('click', () => {
+    let allCorrect = true;
+    a.items.forEach((it, i) => {
+      if (state.horizGraph[it] !== a.values[i]) allCorrect = false;
+    });
+    const status = document.getElementById('act-status');
+    if (allCorrect) {
+      status.textContent = '🎉 가로 그래프도 완성!';
+      status.className = 'act-status ok';
+      state.done.act4 = true;
+      playSound('correct');
+      speak('가로 그래프도 완성! 정말 잘했어요!');
+      setTimeout(() => renderActivity5(), 1500);
+    } else {
+      status.textContent = '😅 표의 숫자와 다시 비교해보세요!';
+      status.className = 'act-status bad';
+      playSound('wrong');
+    }
+  });
+  
+  speak('이번에는 가로 그래프예요. 표의 숫자만큼 엑스를 그려주세요!');
+}
+
+// ========================
+// 활동 5: 비교하기
+// ========================
+function renderActivity5() {
+  state.phase = 'act5';
+  updateHeader('🔍 활동 5: 두 그래프 비교', '같은 점, 다른 점을 찾아봐요', 'green');
+  updateStudentTag();
+  updateProgress();
+  
+  const a = state.problems.activity;
+  const maxVal = Math.max(...a.values);
+  
+  // 미니 세로 그래프
+  const vertHtml = `
+    <div style="background:#fdf2f8; border-radius:14px; padding:10px; border:2px solid #f9a8d4;">
+      <div style="text-align:center; background:#ec4899; color:#fff; padding:4px 10px; border-radius:10px; font-weight:900; font-size:clamp(10px,1.2vw,13px); display:inline-block; margin-bottom:6px;">세로 ○ 그래프</div>
+      <div style="display:grid; grid-template-columns: clamp(28px,3.5vw,40px) repeat(${a.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, clamp(14px,1.8vh,22px)) clamp(28px,3.5vh,40px); gap:0;">
+        ${(() => {
+          let html = '';
+          for (let y = maxVal; y >= 1; y--) {
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.1vw,12px);background:#fce7f3;color:#831843;border:1px solid #f9a8d4;">${y}</div>`;
+            a.items.forEach((it, i) => {
+              const filled = a.values[i] >= y;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:clamp(11px,1.4vw,16px);font-weight:900;color:#ec4899;border:1px solid #fbcfe8;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
+            });
+          }
+          html += `<div style="background:#fce7f3;border:1px solid #f9a8d4;"></div>`;
+          a.items.forEach(it => {
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.1vw,12px);background:#fce7f3;color:#831843;border:1px solid #f9a8d4;">${getEmoji(it)}</div>`;
+          });
+          return html;
+        })()}
+      </div>
+    </div>
+  `;
+  
+  const reversedItems = [...a.items].reverse();
+  const horizHtml = `
+    <div style="background:#ecfdf5; border-radius:14px; padding:10px; border:2px solid #6ee7b7;">
+      <div style="text-align:center; background:#10b981; color:#fff; padding:4px 10px; border-radius:10px; font-weight:900; font-size:clamp(10px,1.2vw,13px); display:inline-block; margin-bottom:6px;">가로 ✕ 그래프</div>
+      <div style="display:grid; grid-template-columns: clamp(50px,6vw,75px) repeat(${maxVal}, 1fr); grid-template-rows: repeat(${a.items.length}, clamp(14px,1.8vh,22px)) clamp(28px,3.5vh,40px); gap:0;">
+        ${(() => {
+          let html = '';
+          reversedItems.forEach(it => {
+            const idx = a.items.indexOf(it);
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.1vw,12px);background:#d1fae5;color:#064e3b;border:1px solid #6ee7b7;">${getEmoji(it)} ${it}</div>`;
+            for (let c = 1; c <= maxVal; c++) {
+              const filled = a.values[idx] >= c;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:clamp(11px,1.4vw,16px);font-weight:900;color:#ef4444;border:1px solid #a7f3d0;background:${filled?'#fef3c7':'#fff'};">${filled?'✕':''}</div>`;
+            }
+          });
+          html += `<div style="background:#d1fae5;border:1px solid #6ee7b7;"></div>`;
+          for (let c = 1; c <= maxVal; c++) {
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.1vw,12px);background:#d1fae5;color:#064e3b;border:1px solid #6ee7b7;">${c}</div>`;
+          }
+          return html;
+        })()}
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">두 그래프를 비교해보세요! 어떤 점이 같고, 어떤 점이 다를까요? 가장 많은 동물이 한눈에 보이나요?</div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:clamp(10px,1.5vw,16px); margin-bottom:clamp(8px,1.2vh,12px);">
+      ${vertHtml}
+      ${horizHtml}
+    </div>
+    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:16px; padding:clamp(12px,2vh,18px); border:3px solid #f59e0b;">
+      <h3 style="font-size:clamp(13px,1.6vw,17px); font-weight:900; color:#78350f; margin-bottom:8px;">🤔 두 그래프에서 알 수 있는 것</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:6px;">
+        <li style="font-size:clamp(12px,1.4vw,15px); font-weight:800; color:#451a03;">✅ 가장 많은 학생이 좋아하는 동물: <span style="color:#dc2626; font-size:clamp(14px,1.7vw,18px);">${getEmoji(a.items[a.values.indexOf(Math.max(...a.values))])} ${a.items[a.values.indexOf(Math.max(...a.values))]} (${Math.max(...a.values)}명)</span></li>
+        <li style="font-size:clamp(12px,1.4vw,15px); font-weight:800; color:#451a03;">✅ 가장 적은 학생이 좋아하는 동물: <span style="color:#2563eb; font-size:clamp(14px,1.7vw,18px);">${getEmoji(a.items[a.values.indexOf(Math.min(...a.values))])} ${a.items[a.values.indexOf(Math.min(...a.values))]} (${Math.min(...a.values)}명)</span></li>
+        <li style="font-size:clamp(12px,1.4vw,15px); font-weight:800; color:#451a03;">✅ 그래프는 <span style="color:#9333ea;">한눈에 비교</span>하기 쉬워요!</li>
+      </ul>
+    </div>
+    <div class="act-footer">
+      <div class="act-status ok">두 그래프를 잘 살펴봤나요?</div>
+      <button class="btn btn-success" id="next-btn">퀴즈로 가기 <span>🎯</span></button>
+    </div>
+  `;
+  
+  document.getElementById('next-btn').addEventListener('click', () => {
+    state.done.act5 = true;
+    renderQuiz();
+  });
+  
+  speak('두 그래프를 비교해보세요. 그래프는 한눈에 비교하기 쉬워요!');
+}
+
+// ========================
+// 퀴즈
+// ========================
+function renderQuiz() {
+  state.phase = 'quiz';
+  state.quizIdx = 0;
+  state.quizAnswers = [];
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  const quizzes = state.problems.quizzes || [];
+  if (state.quizIdx >= quizzes.length) {
+    state.done.quiz = true;
+    renderPostRecord();
+    return;
+  }
+  
+  updateHeader('🎯 퀴즈 도전', `문제 ${state.quizIdx + 1} / ${quizzes.length}`, '');
+  updateStudentTag();
+  updateProgress();
+  
+  const q = quizzes[state.quizIdx];
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="quiz-wrap">
+      <div class="quiz-q">
+        <span class="label">문제 ${state.quizIdx + 1}</span>
+        <div class="qtext">${q.q}</div>
+      </div>
+      <div class="quiz-options">
+        ${q.options.map((opt, i) => `
+          <button class="quiz-opt" data-idx="${i+1}">
+            <span class="num">${i+1}</span>
+            <span style="flex:1;">${opt}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  
+  document.querySelectorAll('.quiz-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sel = parseInt(btn.dataset.idx);
+      const correct = sel === q.ans;
+      state.quizAnswers.push(correct);
+      showQuizFeedback(correct, q.desc);
+    });
+  });
+  
+  speak(q.q);
+}
+
+function showQuizFeedback(correct, desc) {
+  if (correct) playSound('cheer');
+  else playSound('wrong');
+  speak(correct ? '정답이에요! ' + desc : '아쉬워요. ' + desc);
+  
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-bg';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-emoji">${correct ? '🎉' : '😢'}</div>
+      <div class="modal-title" style="color:${correct?'#10b981':'#ef4444'}">${correct ? '정답이에요!' : '아쉬워요!'}</div>
+      <div class="modal-text">${desc}</div>
+      <button class="btn ${correct?'btn-success':'btn-warn'}" id="modal-next">${state.quizIdx < (state.problems.quizzes.length-1) ? '다음 문제' : '결과 보기'} ➡️</button>
+    </div>
+  `;
+  document.querySelector('.body').appendChild(overlay);
+  document.getElementById('modal-next').addEventListener('click', () => {
+    overlay.remove();
+    state.quizIdx++;
+    showQuizQuestion();
+  });
+}
+
+// ========================
+// 사후 녹음
+// ========================
+function renderPostRecord() {
+  state.phase = 'post';
+  updateHeader('🎤 마무리 말하기', '학습 후 다시 한 번 말해보세요', 'orange');
+  updateStudentTag();
+  updateProgress();
+  
+  const p = state.problems.post;
+  const maxVal = Math.max(...p.values);
+  
+  // 그래프 미니 표시
+  const graphHtml = `
+    <div style="background:#fff; border-radius:14px; padding:10px; border:2px solid #c4b5fd;">
+      <div style="text-align:center; background:#7c3aed; color:#fff; padding:4px 12px; border-radius:10px; font-weight:900; font-size:clamp(10px,1.2vw,13px); display:inline-block; margin-bottom:6px;">${p.title}</div>
+      <div style="display:grid; grid-template-columns: clamp(28px,3.5vw,40px) repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, clamp(14px,1.8vh,20px)) clamp(28px,3.5vh,38px);">
+        ${(() => {
+          let html = '';
+          for (let y = maxVal; y >= 1; y--) {
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.1vw,12px);background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${y}</div>`;
+            p.items.forEach((it, i) => {
+              const filled = p.values[i] >= y;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:clamp(11px,1.4vw,16px);font-weight:900;color:#7c3aed;border:1px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
+            });
+          }
+          html += `<div style="background:#ede9fe;border:1px solid #c4b5fd;"></div>`;
+          p.items.forEach(it => {
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:clamp(9px,1.1vw,12px);background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${getEmoji(it)}<br><span style="font-size:0.85em">${it}</span></div>`;
+          });
+          return html;
+        })()}
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">학습한 내용을 활용해 그래프를 보고 알 수 있는 것을 다시 말해보세요!</div>
+    </div>
+    <div class="record-wrap">
+      <div class="record-question">
+        <h3>${p.question}</h3>
+      </div>
+      ${graphHtml}
+      <div class="record-control">
+        <button class="mic-btn" id="mic-btn">🎤</button>
+        <div class="mic-status" id="mic-status">마이크 버튼을 눌러 시작해요</div>
+      </div>
+      <div class="record-text-box empty" id="rec-text">여기에 말한 내용이 적혀요</div>
+      <div style="display:flex; gap:10px; align-items:center; justify-content:flex-end;">
+        <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">학습 전후 비교 <span>📊</span></button>
+      </div>
+    </div>
+  `;
+  
+  setupRecording('post');
+  
+  document.getElementById('next-btn').addEventListener('click', () => {
+    state.done.post = true;
+    saveRecordingToServer('사후');
+    renderCompare();
+  });
+  
+  speak('학습한 내용을 활용해 다시 말해보세요!');
+}
+
+// ========================
+// 학습 전후 비교
+// ========================
+function renderCompare() {
+  state.phase = 'self';
+  updateHeader('📊 학습 전후 비교', '내 말이 어떻게 달라졌을까요?', 'pink');
+  updateStudentTag();
+  updateProgress();
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="tutorial">
+      <div class="lamp">💡</div>
+      <div class="text">학습 전과 학습 후 내가 말한 것을 비교해보세요. 무엇이 달라졌나요?</div>
+    </div>
+    <div class="compare-wrap">
+      <div class="compare-card before">
+        <div class="compare-label">📍 학습 전 (사전 말하기)</div>
+        <div class="compare-text">${state.preText || '(녹음한 내용이 없어요)'}</div>
+      </div>
+      <div class="compare-card after">
+        <div class="compare-label">🌱 학습 후 (사후 말하기)</div>
+        <div class="compare-text">${state.postText || '(녹음한 내용이 없어요)'}</div>
+      </div>
+      
+      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:16px; padding:clamp(14px,2vh,20px); border:3px solid #f59e0b; text-align:center;">
+        <h3 style="font-size:clamp(15px,1.8vw,20px); font-weight:900; color:#78350f; margin-bottom:12px;">⭐ 자기평가 ⭐</h3>
+        <p style="font-size:clamp(12px,1.4vw,15px); font-weight:800; color:#451a03; margin-bottom:12px;">오늘 활동을 잘 했다고 생각하나요? 별을 눌러주세요!</p>
+        <div class="stars-row" id="stars-row">
+          ${[1,2,3,4,5].map(n => `<button class="star-btn" data-n="${n}">⭐</button>`).join('')}
+        </div>
+        <div id="star-feedback" style="margin-top:10px; font-weight:800; font-size:clamp(13px,1.5vw,16px); color:#78350f;"></div>
+      </div>
+    </div>
+  `;
+  
+  document.querySelectorAll('.star-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const n = parseInt(btn.dataset.n);
+      state.selfStars = n;
+      document.querySelectorAll('.star-btn').forEach((b, i) => {
+        if (i < n) b.classList.add('lit');
+        else b.classList.remove('lit');
+      });
+      
+      const fb = document.getElementById('star-feedback');
+      if (n <= 3) {
+        fb.innerHTML = `별 ${n}개! 한 번 더 도전해보면 더 잘할 수 있어요!<br>
+          <button class="btn btn-warn" id="retry-btn" style="margin-top:10px;">🔄 다시 도전하기</button>
+          <button class="btn btn-success" id="finish-btn" style="margin-top:10px;">📜 그래도 마치기</button>`;
+        document.getElementById('retry-btn').addEventListener('click', () => {
+          state.retried = true;
+          // 활동 1부터 재시작
+          state.done.act1 = state.done.act2 = state.done.act3 = state.done.act4 = state.done.act5 = false;
+          state.done.quiz = state.done.post = false;
+          state.classifyData = {}; state.tableData = {}; state.vertGraph = {}; state.horizGraph = {};
+          state.quizIdx = 0; state.quizAnswers = [];
+          renderActivity1();
+        });
+        document.getElementById('finish-btn').addEventListener('click', renderCertificate);
+      } else {
+        fb.innerHTML = `🎉 별 ${n}개! 정말 잘했어요! 수료증을 받으러 가요!<br>
+          <button class="btn btn-pink" id="finish-btn" style="margin-top:10px;">📜 수료증 받기</button>`;
+        document.getElementById('finish-btn').addEventListener('click', renderCertificate);
+      }
+      playSound('cheer');
+    });
+  });
+  
+  speak('학습 전과 후를 비교해보세요. 그리고 자기평가 별을 눌러주세요.');
+}
+
+// ========================
+// 수료증
+// ========================
+function renderCertificate() {
+  state.phase = 'cert';
+  updateHeader('🏆 수료증', '오늘 학습을 마쳤어요!', 'pink');
+  updateStudentTag();
+  updateProgress();
+  
+  const correctCount = state.quizAnswers.filter(x=>x).length;
+  const duration = Math.round((Date.now() - state.startTime) / 60000);
+  const today = new Date();
+  
+  document.getElementById('scene').innerHTML = `
+    <div class="cert-wrap">
+      <div class="cert">
+        <div class="seal">🏆</div>
+        <h2>수 료 증</h2>
+        <div style="font-size:clamp(11px,1.3vw,14px); color:#92400e; font-weight:800; letter-spacing:0.2em; margin-bottom:8px;">No. 2024-001</div>
+        <div class="who">${state.student.name} 친구</div>
+        <div class="text">
+          위 친구는 자료를 분류하여<br>
+          <strong style="color:#7c3aed;">표와 그림그래프</strong>로 잘 나타냈고,<br>
+          그래프의 편리한 점을 잘 설명했기에<br>
+          이 증서를 드립니다.
+        </div>
+        <div style="margin:14px 0; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+          <span style="background:#fff; padding:4px 12px; border-radius:10px; font-size:clamp(11px,1.3vw,13px); font-weight:800; color:#1e40af;">⭐ 자기평가: ${state.selfStars}개</span>
+          <span style="background:#fff; padding:4px 12px; border-radius:10px; font-size:clamp(11px,1.3vw,13px); font-weight:800; color:#059669;">🎯 퀴즈: ${correctCount}/${state.problems.quizzes.length}</span>
+          <span style="background:#fff; padding:4px 12px; border-radius:10px; font-size:clamp(11px,1.3vw,13px); font-weight:800; color:#dc2626;">⏱️ ${duration}분</span>
+        </div>
+        <div class="date">${today.getFullYear()}. ${today.getMonth()+1}. ${today.getDate()}.</div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+        <button class="btn btn-primary" id="restart-btn">🔄 처음으로</button>
+      </div>
+    </div>
+  `;
+  
+  // 결과 자동 저장
+  const correct = state.quizAnswers;
+  callAPI('saveResult', {
+    studentNum: state.student.num,
+    studentName: state.student.name,
+    activity1: state.done.act1, activity2: state.done.act2,
+    activity3: state.done.act3, activity4: state.done.act4, activity5: state.done.act5,
+    quiz1: correct[0] || false, quiz2: correct[1] || false, quiz3: correct[2] || false,
+    selfStars: state.selfStars, retried: state.retried,
+    duration: duration
+  });
+  
+  document.getElementById('restart-btn').addEventListener('click', () => {
+    Object.keys(state.done).forEach(k => state.done[k] = false);
+    state.student = null;
+    state.classifyData = {}; state.tableData = {}; state.vertGraph = {}; state.horizGraph = {};
+    state.quizIdx = 0; state.quizAnswers = [];
+    state.preText = ''; state.postText = ''; state.selfStars = 0; state.retried = false;
+    state.startTime = Date.now();
+    renderIntro();
+  });
+  
+  playSound('cheer');
+  speak(`축하해요! ${state.student.name} 친구! 수료증을 받았어요!`);
+}
+
+// ========================
+// 시작
+// ========================
+window.addEventListener('DOMContentLoaded', init);
+
+// 음성 목록 미리 로드
+if (window.speechSynthesis) {
+  window.speechSynthesis.onvoiceschanged = () => {};
+}
+</script>
+</body>
+</html>
