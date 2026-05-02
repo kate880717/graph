@@ -673,7 +673,7 @@ const ITEM_EMOJI = {
 function getEmoji(item) { return ITEM_EMOJI[item] || '⭐'; }
 
 // ========================
-// 초기 로딩
+// 초기 로딩 + 마이크 권한
 // ========================
 async function init() {
   fitStage();
@@ -684,6 +684,9 @@ async function init() {
   
   renderLoading();
   
+  // 마이크 권한 미리 확인 (한 번만)
+  await requestMicPermission();
+  
   const data = await callAPI('getInitData');
   if (data && !data.error) {
     state.problems = data.problems;
@@ -693,6 +696,27 @@ async function init() {
   }
   
   renderIntro();
+}
+
+// 마이크 권한을 미리 받기 (한 번만 요청)
+async function requestMicPermission() {
+  if (state.micPermission !== null) return; // 이미 물었으면 스킵
+  
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.micPermission = true;
+    state.micStream = stream;
+    // 스트림 저장해두고 나중에 재사용
+    say('마이크 권한이 허용되었어요! 이제 녹음할 준비가 됐어요.');
+  } catch (err) {
+    if (err.name === 'NotAllowedError') {
+      state.micPermission = false;
+      say('마이크 권한이 거부되었어요. 나중에 설정에서 허용해주세요.');
+    } else {
+      // 다른 오류는 일단 무시하고 진행
+      state.micPermission = null;
+    }
+  }
 }
 
 function setDefaultData() {
@@ -806,40 +830,41 @@ function renderIntro() {
 }
 
 // ========================
-// 화면: 학생 선택
+// 화면: 학생 선택 (드롭다운)
 // ========================
 function renderStudentSelect() {
   state.phase = 'student';
-  updateHeader('👋', '친구를 골라봐요', '내 이름을 찾아 눌러주세요', 'pink');
+  updateHeader('👋', '친구를 골라봐요', '아래에서 이름을 선택해주세요', 'pink');
   updateStudentTag();
   updateProgress();
   
   const avatars = ['🦊','🐻','🐼','🐯','🦁','🐸','🐵','🐨','🐰','🐹','🦄','🐙','🐳','🦋','🌟'];
+  const charIdx = Math.floor(Math.random() * avatars.length);
   
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML('자기 이름을 찾아 눌러주세요. 이름이 없다면 선생님께 말씀해주세요!')}
-    <div class="student-grid" id="student-grid">
-      ${state.students.length === 0 
-        ? '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9ca3af;font-weight:800;font-size:18px">학생 명단이 비어있어요. 시트에서 등록해주세요.</div>'
-        : state.students.map((s, i) => `
-        <div class="student-card" data-num="${s.num}" data-name="${s.name}">
-          <div class="avatar">${avatars[i % avatars.length]}</div>
-          <div class="num">${s.num}번</div>
-          <div class="name">${s.name}</div>
-        </div>
-      `).join('')}
+    <div class="student-select-wrap">
+      <div class="big-character">${avatars[charIdx]}</div>
+      <div class="select-card">
+        <div class="select-label">👇 자기 이름을 선택해보세요</div>
+        <select class="student-select" id="student-select">
+          <option value="">-- 이름을 선택해주세요 --</option>
+          ${state.students.map(s => `<option value="${s.num}|${s.name}">${s.name}</option>`).join('')}
+        </select>
+      </div>
     </div>
   `;
   
-  document.querySelectorAll('.student-card').forEach(card => {
-    card.addEventListener('click', () => {
-      state.student = { num: card.dataset.num, name: card.dataset.name };
-      playSound('pop');
-      say(`${card.dataset.name} 친구, 안녕하세요! 함께 시작해 봐요.`);
-      setTimeout(() => renderPreRecord(), 800);
-    });
+  const selectEl = document.getElementById('student-select');
+  selectEl.addEventListener('change', (e) => {
+    if (!e.target.value) return;
+    const [num, name] = e.target.value.split('|');
+    state.student = { num, name };
+    playSound('pop');
+    say(`${name} 친구, 안녕하세요! 함께 시작해 봐요.`);
+    setTimeout(() => renderPreRecord(), 800);
   });
-  say('자기 이름을 찾아 눌러주세요!');
+  
+  say('자기 이름을 선택해주세요!');
 }
 
 // ========================
@@ -1178,7 +1203,7 @@ function placeItem(itName, id) {
 }
 
 // ========================
-// 활동 2: 표 완성
+// 활동 2: 표 완성 (분류 결과 미리보기 추가)
 // ========================
 function renderActivity2() {
   state.phase = 'act2';
@@ -1188,16 +1213,39 @@ function renderActivity2() {
   
   const a = state.problems.activity;
   
+  // 분류 결과 미리보기 HTML
+  const previewHtml = `
+    <div class="classify-preview">
+      <h4>📝 앞에서 분류한 결과를 확인해보세요</h4>
+      <div class="preview-row">
+        ${a.items.map((it, i) => {
+          const count = state.classifyData[it] || 0;
+          return `
+            <div class="preview-col">
+              <div class="label">${getEmoji(it)} ${it}</div>
+              <div class="stack">
+                ${Array.from({length: Math.min(count, 5)}).map(() => `<span>${getEmoji(it)}</span>`).join('')}
+                ${count > 5 ? `<span style="font-size:18px; color:#ec4899; font-weight:900;">+${count-5}</span>` : ''}
+              </div>
+              <div class="num">${count}마리</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML('앞에서 분류한 동물의 수를 표 빈칸에 적어보세요. 합계도 잊지 마세요!')}
+    ${tutorialHTML('앞에서 분류한 동물의 수를 표 빈칸에 적어보세요. 왼쪽의 분류 결과를 확인하면서 적으세요!')}
+    ${previewHtml}
     <div style="flex:1; display:flex; align-items:center; justify-content:center;">
       <div class="table-wrap" style="max-width:1000px; width:100%;">
-        <h3 style="text-align:center; font-size:20px; font-weight:900; color:#831843; margin-bottom:14px;">${a.title}</h3>
+        <h3 style="text-align:center; font-size:24px; font-weight:700; color:#831843; margin-bottom:14px;">${a.title}</h3>
         <table class="data-table">
           <thead>
             <tr>
               <th>동물</th>
-              ${a.items.map(it => `<th><span style="font-size:24px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
+              ${a.items.map(it => `<th><span style="font-size:28px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
               <th>합계</th>
             </tr>
           </thead>
@@ -1254,7 +1302,7 @@ function renderActivity2() {
     }
   });
   
-  setTimeout(() => say('분류한 동물 수를 표 빈칸에 적어주세요. 합계도 잊지 마세요!'), 400);
+  setTimeout(() => say('앞에서 분류한 동물 수를 표 빈칸에 적어주세요. 왼쪽의 분류 결과를 확인하면서 적으세요!'), 400);
 }
 
 // ========================
