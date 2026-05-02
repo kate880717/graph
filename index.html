@@ -164,8 +164,6 @@
     border: none; border-radius: 50%; width: 48px; height: 48px;
     cursor: pointer; font-size: 22px; transition: all 0.2s;
   }
-  .tutorial-speaker:hover { transform: scale(1.1); background: #d97706; }er; font-size: 20px; transition: all 0.2s;
-  }
   .tutorial-speaker:hover { transform: scale(1.1); background: #d97706; }
   
   /* ---- 표 ---- */
@@ -343,7 +341,7 @@
   
   .record-text-box { background: #fff; border: 3px solid #e0e7ff; border-radius: 14px; padding: 12px 16px; min-height: 60px; max-height: 80px; font-size: 20px; font-weight: 600; color: #1f2937; line-height: 1.5; flex: 0 1 auto; overflow-y: auto; font-family: inherit; resize: none; width: 100%; }
   .record-text-box:focus { outline: none; border-color: #6366f1; background: #fafbff; }
-  .record-text-box.empty { color: #9ca3af; font-weight: 600; font-style: italic; }
+  .record-text-box::placeholder { color: #9ca3af; font-weight: 600; font-style: italic; }
   
   .sample-toggle { background: #fef3c7; border: 3px dashed #f59e0b; padding: 10px 22px; border-radius: 14px; cursor: pointer; font-weight: 700; font-size: 19px; color: #92400e; font-family: inherit; }
   .sample-content { background: #fefce8; border-left: 5px solid #f59e0b; padding: 12px 16px; border-radius: 10px; font-size: 20px; color: #713f12; line-height: 1.5; font-weight: 600; margin-top: 4px; }
@@ -517,10 +515,6 @@ const tts = {
       this.voices = window.speechSynthesis.getVoices();
       if (this.voices.length === 0) return;
       
-      // 한국어 여성 음성 우선순위:
-      // 1) Google 한국어 (자연스러움)
-      // 2) Microsoft Heami / SunHi (Edge - 여성)
-      // 3) 기타 ko-KR
       const koVoices = this.voices.filter(v => v.lang === 'ko-KR' || v.lang.startsWith('ko'));
       
       this.bestVoice = 
@@ -539,7 +533,6 @@ const tts = {
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = loadVoices;
     }
-    // 일부 브라우저는 약간 늦게 로드되므로 재시도
     setTimeout(loadVoices, 500);
     setTimeout(loadVoices, 1500);
   },
@@ -551,7 +544,6 @@ const tts = {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
     if (this.bestVoice) u.voice = this.bestVoice;
-    // 유치원 선생님처럼: 약간 느리고, 약간 높은 음, 친근하게
     u.rate = opts.rate || 0.95;
     u.pitch = opts.pitch || 1.15;
     u.volume = opts.volume || 1.0;
@@ -564,7 +556,6 @@ const tts = {
   }
 };
 
-// 짧은 헬퍼
 function say(text, opts) { tts.speak(text, opts); }
 
 // ========================
@@ -638,8 +629,8 @@ function playSound(type) {
 const state = {
   phase: 'loading',
   speaker: false,
-  micPermission: null, // null=미확인, true=허용, false=거부
-  micStream: null,     // 한 번 받은 스트림 재사용
+  micPermission: null,
+  micStream: null,
   student: null,
   students: [],
   problems: null,
@@ -734,7 +725,6 @@ async function init() {
   
   renderLoading();
   
-  // 마이크 권한 미리 확인 (한 번만)
   await requestMicPermission();
   
   const data = await callAPI('getInitData');
@@ -748,22 +738,19 @@ async function init() {
   renderIntro();
 }
 
-// 마이크 권한을 미리 받기 (한 번만 요청)
 async function requestMicPermission() {
-  if (state.micPermission !== null) return; // 이미 물었으면 스킵
+  if (state.micPermission !== null) return;
   
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     state.micPermission = true;
     state.micStream = stream;
-    // 스트림 저장해두고 나중에 재사용
     say('마이크 권한이 허용되었어요! 이제 녹음할 준비가 됐어요.');
   } catch (err) {
     if (err.name === 'NotAllowedError') {
       state.micPermission = false;
-      say('마이크 권한이 거부되었어요. 나중에 설정에서 허용해주세요.');
+      say('마이크 권한이 거부되었어요. 키보드로 직접 입력할 수 있어요.');
     } else {
-      // 다른 오류는 일단 무시하고 진행
       state.micPermission = null;
     }
   }
@@ -930,6 +917,9 @@ function renderStudentSelect() {
 
 // ========================
 // 화면: 사전 녹음
+// ★ 변경: 맨 위 튜토리얼 박스 제거 (질문 박스만 남김)
+// ★ 변경: textarea로 키보드 직접 입력 가능하게
+// ★ 변경: 마이크 아래에만 활동 방법 안내
 // ========================
 function renderPreRecord() {
   state.phase = 'pre';
@@ -938,10 +928,8 @@ function renderPreRecord() {
   updateProgress();
   
   const p = state.problems.pre;
-  const tutorialText = '아래 표를 보고 알 수 있는 것을 마이크 버튼을 눌러 말해보세요. 학습 후에 다시 한 번 말해 볼 거예요!';
   
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML(tutorialText)}
     <div class="record-wrap">
       <div class="record-question">
         <h3>${p.question}</h3>
@@ -964,9 +952,9 @@ function renderPreRecord() {
       </div>
       <div class="record-control">
         <button class="mic-btn" id="mic-btn">🎤</button>
-        <div class="mic-status" id="mic-status">마이크 버튼을 눌러 시작해요</div>
+        <div class="mic-status" id="mic-status">🎤 마이크를 누르거나 ⌨️ 아래 칸에 직접 적어보세요</div>
       </div>
-      <div class="record-text-box empty" id="rec-text">여기에 말한 내용이 적혀요</div>
+      <textarea class="record-text-box" id="rec-text" placeholder="여기에 직접 적거나, 마이크로 말한 내용이 적혀요"></textarea>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
         <button class="sample-toggle" id="sample-btn">💡 예시 답안 듣기</button>
         <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">
@@ -996,18 +984,33 @@ function renderPreRecord() {
   });
   
   setTimeout(() => {
-    say(`${p.question} 표를 보고 알 수 있는 것을 자유롭게 말해보세요. 빨간 마이크 버튼을 눌러주세요.`);
+    say(`${p.question}`);
   }, 400);
 }
 
 // ========================
-// 녹음 셋업
+// 녹음 셋업 (textarea + 키보드 입력 지원)
 // ========================
 function setupRecording(type) {
   const micBtn = document.getElementById('mic-btn');
   const status = document.getElementById('mic-status');
   const textBox = document.getElementById('rec-text');
   const nextBtn = document.getElementById('next-btn');
+  
+  // 키보드로 직접 입력해도 다음 버튼 활성화
+  textBox.addEventListener('input', () => {
+    const v = textBox.value.trim();
+    if (type === 'pre') state.preText = v;
+    else state.postText = v;
+    
+    if (v.length > 0) {
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = '1';
+    } else {
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = '0.5';
+    }
+  });
   
   let recognition = null;
   let isRecording = false;
@@ -1030,8 +1033,7 @@ function setupRecording(type) {
       }
       const display = finalText + interim;
       if (display.trim()) {
-        textBox.classList.remove('empty');
-        textBox.textContent = display;
+        textBox.value = display;
       }
       if (type === 'pre') state.preText = finalText.trim();
       else state.postText = finalText.trim();
@@ -1039,7 +1041,7 @@ function setupRecording(type) {
     
     recognition.onerror = (e) => {
       if (e.error === 'not-allowed') {
-        status.textContent = '⚠️ 마이크 권한을 허용해주세요';
+        status.textContent = '⚠️ 마이크 권한 없음 - 아래 칸에 키보드로 직접 입력해주세요';
         isRecording = false;
         micBtn.classList.remove('recording');
       }
@@ -1053,7 +1055,6 @@ function setupRecording(type) {
   micBtn.addEventListener('click', async () => {
     if (!isRecording) {
       try {
-        // TTS 중지 (녹음 시 방해 방지)
         tts.stop();
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
@@ -1066,7 +1067,7 @@ function setupRecording(type) {
             const base64 = reader.result.split(',')[1];
             if (type === 'pre') state.preAudio = base64;
             else state.postAudio = base64;
-            const text = (type === 'pre' ? state.preText : state.postText) || textBox.textContent;
+            const text = (type === 'pre' ? state.preText : state.postText) || textBox.value;
             if (text && text.trim().length > 0) {
               nextBtn.disabled = false;
               nextBtn.style.opacity = '1';
@@ -1082,10 +1083,9 @@ function setupRecording(type) {
         micBtn.textContent = '⏹️';
         status.textContent = '🔴 녹음 중... 말해주세요!';
         status.classList.add('live');
-        textBox.classList.remove('empty');
-        textBox.textContent = '';
+        textBox.value = '';
       } catch (err) {
-        status.textContent = '⚠️ 마이크를 사용할 수 없어요. 권한을 확인해주세요.';
+        status.textContent = '⚠️ 마이크를 사용할 수 없어요. 아래 칸에 키보드로 입력해주세요.';
       }
     } else {
       isRecording = false;
@@ -1093,9 +1093,9 @@ function setupRecording(type) {
       if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
       micBtn.classList.remove('recording');
       micBtn.textContent = '🎤';
-      status.textContent = '✅ 녹음 끝! 다시 누르면 다시 녹음해요';
+      status.textContent = '✅ 녹음 끝! 다시 누르면 다시 녹음해요 (또는 아래에 직접 수정 가능)';
       status.classList.remove('live');
-      const text = (type === 'pre' ? state.preText : state.postText) || textBox.textContent;
+      const text = (type === 'pre' ? state.preText : state.postText) || textBox.value;
       if (text && text.trim().length > 0) {
         nextBtn.disabled = false;
         nextBtn.style.opacity = '1';
@@ -1149,10 +1149,10 @@ function showConceptModal(opts) {
     const overlay = document.createElement('div');
     overlay.className = 'modal-bg';
     overlay.innerHTML = `
-      <div class="modal-box" style="max-width:680px;">
+      <div class="modal-box" style="max-width:720px;">
         <div class="modal-emoji">${opts.emoji}</div>
-        <div class="modal-title" style="color:${opts.color || '#7c3aed'};">${opts.title}</div>
-        <div style="background:${opts.bgColor || '#faf5ff'}; border:3px solid ${opts.borderColor || '#c4b5fd'}; padding:18px 22px; border-radius:14px; text-align:left; margin-bottom:18px;">
+        <div class="modal-title" style="color:${opts.color || '#7c3aed'}; font-size:38px;">${opts.title}</div>
+        <div style="background:${opts.bgColor || '#faf5ff'}; border:3px solid ${opts.borderColor || '#c4b5fd'}; padding:22px 26px; border-radius:14px; text-align:left; margin-bottom:18px;">
           ${opts.content}
         </div>
         <div class="modal-btns">
@@ -1174,7 +1174,7 @@ function showConceptModal(opts) {
 // ========================
 // 활동 1: 분류하기 (선택 → 분류함 클릭 방식)
 // ========================
-let selectedClassifyItem = null; // {id, item, el}
+let selectedClassifyItem = null;
 
 function renderActivity1() {
   state.phase = 'act1';
@@ -1189,7 +1189,6 @@ function renderActivity1() {
       sourceItems.push({ id: `${it}-${i}`, item: it });
     }
   });
-  // 셔플
   for (let i = sourceItems.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [sourceItems[i], sourceItems[j]] = [sourceItems[j], sourceItems[i]];
@@ -1264,7 +1263,6 @@ function renderActivity1() {
       say('완벽해요! 모두 잘 분류했어요. 이제 표를 만들어 봐요.');
       setTimeout(() => renderActivity2(), 1800);
     } else {
-      // 힌트 제공
       const hint = wrongItems[0];
       let hintMsg;
       if (hint.current > hint.target) {
@@ -1283,18 +1281,14 @@ function renderActivity1() {
 }
 
 function setupClassifyDnD() {
-  // 동물 클릭 = 선택
   document.querySelectorAll('.source-item').forEach(item => {
-    // 드래그 이벤트
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', JSON.stringify({ id: item.dataset.id, item: item.dataset.item }));
     });
     
-    // 클릭 = 선택
     item.addEventListener('click', () => {
       if (item.classList.contains('used')) return;
       
-      // 같은 거 다시 클릭 = 선택 해제
       if (selectedClassifyItem && selectedClassifyItem.el === item) {
         item.classList.remove('selected');
         selectedClassifyItem = null;
@@ -1304,13 +1298,11 @@ function setupClassifyDnD() {
         return;
       }
       
-      // 다른 거 선택되어 있으면 해제
       document.querySelectorAll('.source-item.selected').forEach(s => s.classList.remove('selected'));
       
       item.classList.add('selected');
       selectedClassifyItem = { id: item.dataset.id, item: item.dataset.item, el: item };
       
-      // 모든 분류함 강조
       document.querySelectorAll('.classify-bin').forEach(b => b.classList.add('can-drop'));
       
       const status = document.getElementById('act-status');
@@ -1322,7 +1314,6 @@ function setupClassifyDnD() {
   });
   
   document.querySelectorAll('.classify-bin').forEach(bin => {
-    // 드래그앤드롭
     bin.addEventListener('dragover', (e) => { e.preventDefault(); bin.classList.add('drag-over'); });
     bin.addEventListener('dragleave', () => bin.classList.remove('drag-over'));
     bin.addEventListener('drop', (e) => {
@@ -1332,7 +1323,6 @@ function setupClassifyDnD() {
       handleClassifyAttempt(data.item, data.id, bin);
     });
     
-    // 클릭 (선택된 동물이 있을 때)
     bin.addEventListener('click', () => {
       if (!selectedClassifyItem) {
         const status = document.getElementById('act-status');
@@ -1352,12 +1342,10 @@ function handleClassifyAttempt(itemName, itemId, bin) {
   const targetItem = bin.dataset.item;
   
   if (itemName === targetItem) {
-    // 정답!
     placeItem(targetItem, itemId);
     if (sourceEl) sourceEl.classList.add('used');
     playSound('correct');
     
-    // 선택 해제
     document.querySelectorAll('.source-item.selected').forEach(s => s.classList.remove('selected'));
     document.querySelectorAll('.classify-bin').forEach(b => b.classList.remove('can-drop'));
     selectedClassifyItem = null;
@@ -1366,7 +1354,6 @@ function handleClassifyAttempt(itemName, itemId, bin) {
     status.innerHTML = `✅ 잘했어요! ${getEmoji(targetItem)} ${targetItem} 분류함에 잘 넣었어요!`;
     status.className = 'act-status ok';
   } else {
-    // 오답
     bin.style.animation = 'shake 0.4s';
     setTimeout(() => bin.style.animation = '', 400);
     playSound('wrong');
@@ -1399,7 +1386,6 @@ function renderActivity2() {
   
   const a = state.problems.activity;
   
-  // 분류 결과 미리보기 (가로 한 줄로)
   const previewHtml = `
     <div class="classify-preview">
       <h4>📝 앞에서 분류한 결과</h4>
@@ -1447,7 +1433,6 @@ function renderActivity2() {
     </div>
   `;
   
-  // 합계 자동 계산 + 한 자리 숫자만 입력
   function updateAutoSum() {
     let sum = 0;
     document.querySelectorAll('.cell-input').forEach(inp => {
@@ -1458,17 +1443,13 @@ function renderActivity2() {
   }
   
   document.querySelectorAll('.cell-input').forEach(inp => {
-    // 숫자만, 한 자리만 (0~9)
     inp.addEventListener('input', (e) => {
-      // 숫자만 남기기
       let v = inp.value.replace(/[^0-9]/g, '');
-      // 한 자리만
       if (v.length > 1) v = v.charAt(v.length - 1);
       inp.value = v;
       inp.classList.remove('correct', 'wrong');
       updateAutoSum();
       
-      // 입력 후 다음 칸으로 자동 포커스
       if (v.length === 1) {
         const inputs = Array.from(document.querySelectorAll('.cell-input'));
         const idx = inputs.indexOf(inp);
@@ -1520,7 +1501,6 @@ function renderActivity2() {
       say('표를 완벽하게 완성했어요! 이제 그래프를 그려 봐요.');
       setTimeout(() => renderActivity3(), 1800);
     } else {
-      // 힌트 제공
       if (firstWrong) {
         const realCount = state.classifyData[firstWrong.name] || firstWrong.expected;
         status.innerHTML = `💡 힌트: 위의 ${getEmoji(firstWrong.name)} ${firstWrong.name} 분류함을 다시 세어보세요! (${realCount}마리예요)`;
@@ -1536,6 +1516,7 @@ function renderActivity2() {
 
 // ========================
 // 활동 3: 세로 그래프 (○) - 표 참고 박스 포함
+// ★ 변경: 개념 모달 글씨 크기 키우고 핵심 단어 하이라이트, 한 줄 표현
 // ========================
 async function renderActivity3() {
   state.phase = 'act3';
@@ -1543,7 +1524,7 @@ async function renderActivity3() {
   updateStudentTag();
   updateProgress();
   
-  // 개념 설명 모달
+  // 개념 설명 모달 - 글씨 크기 키우고 핵심 단어 하이라이트
   await showConceptModal({
     emoji: '📊',
     title: '왜 그래프로 그릴까요?',
@@ -1551,15 +1532,17 @@ async function renderActivity3() {
     bgColor: '#fdf2f8',
     borderColor: '#f9a8d4',
     content: `
-      <p style="font-size:21px; font-weight:700; color:#831843; margin-bottom:12px; line-height:1.6;">
-        🤔 표 안의 숫자는 정확하지만, <br>
-        <strong style="color:#dc2626;">누가 가장 많은지 한눈에 보기는 어려워요!</strong>
+      <p style="font-size:24px; font-weight:700; color:#831843; margin-bottom:14px; line-height:1.5;">
+        🤔 표 안의 숫자는 정확하지만,
       </p>
-      <p style="font-size:21px; font-weight:700; color:#831843; margin-bottom:12px; line-height:1.6;">
-        🎨 그래서 숫자만큼 <strong style="color:#ec4899;">○ 동그라미</strong>를 그려서<br>
-        그림으로 나타내요.
+      <p style="font-size:30px; font-weight:900; color:#dc2626; margin-bottom:18px; line-height:1.4; text-align:center; background:#fff; padding:14px 20px; border-radius:14px; border:3px solid #fca5a5;">
+        누가 가장 많은지<br>
+        <span style="background:linear-gradient(180deg, transparent 60%, #fde68a 60%);">한눈에 보기는 어려워요!</span>
       </p>
-      <div style="background:#fff; border:2px dashed #ec4899; padding:12px 16px; border-radius:12px; margin-top:12px;">
+      <p style="font-size:24px; font-weight:700; color:#831843; margin-bottom:14px; line-height:1.5;">
+        🎨 그래서 숫자만큼 <span style="background:#fce7f3; color:#be185d; padding:2px 10px; border-radius:8px;">○ 동그라미</span>를 그려서 그림으로 나타내요.
+      </p>
+      <div style="background:#fff; border:2px dashed #ec4899; padding:14px 18px; border-radius:12px; margin-top:14px;">
         <p style="font-size:19px; font-weight:700; color:#9f1239; line-height:1.6;">
           ✨ <strong>사용 방법</strong><br>
           • 칸을 <strong>클릭</strong>하면 ○가 채워져요<br>
@@ -1579,7 +1562,6 @@ async function renderActivity3() {
   const yLabels = [];
   for (let y = maxVal; y >= 1; y--) yLabels.push(y);
   
-  // 표 참고 박스
   const refTableHtml = `
     <div class="ref-table">
       <div class="ref-label">📋 표 참고</div>
@@ -1618,7 +1600,6 @@ async function renderActivity3() {
       const row = parseInt(cell.dataset.row);
       const cur = state.vertGraph[it] || 0;
       
-      // 잘못 표시된 거 있으면 제거
       document.querySelectorAll('.graph-vert .col-wrong').forEach(c => c.classList.remove('col-wrong'));
       
       if (cell.classList.contains('filled')) {
@@ -1656,7 +1637,6 @@ async function renderActivity3() {
     let firstWrong = null;
     let wrongItems = [];
     
-    // 기존 표시 제거
     document.querySelectorAll('.graph-vert .col-wrong').forEach(c => c.classList.remove('col-wrong'));
     
     a.items.forEach((it, i) => {
@@ -1676,9 +1656,7 @@ async function renderActivity3() {
       say('완벽한 세로 그래프예요! 이번엔 가로로 그려 봐요.');
       setTimeout(() => renderActivity4(), 1800);
     } else {
-      // 틀린 동물 칸 전체에 빨간 네모
       wrongItems.forEach(it => {
-        // 그 동물의 모든 셀 + x-label에 wrong 표시
         document.querySelectorAll(`.graph-vert .cell[data-item="${it}"]`).forEach(c => c.classList.add('col-wrong'));
         const xLabel = document.querySelector(`.graph-vert .x-label[data-item="${it}"]`);
         if (xLabel) xLabel.classList.add('col-wrong');
@@ -1696,6 +1674,7 @@ async function renderActivity3() {
 
 // ========================
 // 활동 4: 가로 그래프 - 표 참고 + 기호 선택
+// ★ 변경: 개념 모달 글씨 크기 키우고 한 줄 표현
 // ========================
 async function renderActivity4() {
   state.phase = 'act4';
@@ -1703,7 +1682,6 @@ async function renderActivity4() {
   updateStudentTag();
   updateProgress();
   
-  // 개념 설명 모달
   await showConceptModal({
     emoji: '🔄',
     title: '가로 그래프도 그려봐요!',
@@ -1711,16 +1689,15 @@ async function renderActivity4() {
     bgColor: '#ecfdf5',
     borderColor: '#6ee7b7',
     content: `
-      <p style="font-size:21px; font-weight:700; color:#064e3b; margin-bottom:12px; line-height:1.6;">
-        🤔 같은 자료를 <strong style="color:#dc2626;">가로</strong>로도<br>
-        <strong style="color:#dc2626;">세로</strong>로도 그릴 수 있어요!
+      <p style="font-size:30px; font-weight:900; color:#065f46; margin-bottom:18px; line-height:1.4; text-align:center; background:#fff; padding:14px 20px; border-radius:14px; border:3px solid #6ee7b7;">
+        같은 자료를 <span style="color:#dc2626;">가로</span>로도<br>
+        <span style="color:#dc2626;">세로</span>로도 그릴 수 있어요!
       </p>
-      <p style="font-size:21px; font-weight:700; color:#064e3b; margin-bottom:12px; line-height:1.6;">
-        ✨ 이번엔 동물 이름이 <strong style="color:#10b981;">왼쪽</strong>에 있고,<br>
-        숫자가 <strong style="color:#10b981;">아래</strong>에 있어요.
+      <p style="font-size:22px; font-weight:700; color:#064e3b; margin-bottom:14px; line-height:1.5;">
+        ✨ 이번엔 동물 이름이 <span style="background:#d1fae5; color:#065f46; padding:2px 10px; border-radius:8px;">왼쪽</span>에 있고, 숫자가 <span style="background:#d1fae5; color:#065f46; padding:2px 10px; border-radius:8px;">아래</span>에 있어요.
       </p>
-      <div style="background:#fff; border:2px dashed #10b981; padding:12px 16px; border-radius:12px; margin-top:12px;">
-        <p style="font-size:19px; font-weight:700; color:#065f46; line-height:1.6;">
+      <div style="background:#fff; border:2px dashed #10b981; padding:14px 18px; border-radius:12px; margin-top:14px;">
+        <p style="font-size:20px; font-weight:700; color:#065f46; line-height:1.6;">
           🎨 <strong>좋아하는 기호를 골라서</strong> 그려봐요!<br>
           하트 ❤️, 별 ⭐, 세모 △, 동그라미 ○ 등<br>
           어떤 기호로 그려도 그래프는 똑같이 만들어져요!
@@ -1737,7 +1714,6 @@ async function renderActivity4() {
   const maxVal = Math.max(...a.values);
   const reversedItems = [...a.items].reverse();
   
-  // 표 참고 박스
   const refTableHtml = `
     <div class="ref-table">
       <div class="ref-label">📋 표 참고</div>
@@ -1749,7 +1725,6 @@ async function renderActivity4() {
     </div>
   `;
   
-  // 기호 선택 (기본: ✕)
   let currentSymbol = '✕';
   const symbols = [
     { sym: '✕', color: '#ef4444' },
@@ -1787,7 +1762,6 @@ async function renderActivity4() {
     </div>
   `;
   
-  // 기호 선택 이벤트
   document.querySelectorAll('.symbol-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
@@ -1803,7 +1777,6 @@ async function renderActivity4() {
       const col = parseInt(cell.dataset.col);
       const cur = state.horizGraph[it] || 0;
       
-      // 기존 빨간 네모 제거
       document.querySelectorAll('.graph-horiz .row-wrong').forEach(c => c.classList.remove('row-wrong'));
       
       if (cell.classList.contains('filled')) {
@@ -1860,7 +1833,6 @@ async function renderActivity4() {
       say('가로 그래프도 완성! 정말 잘했어요. 이제 두 그래프를 비교해 봐요.');
       setTimeout(() => renderActivity5(), 1800);
     } else {
-      // 틀린 동물의 가로줄 전체에 빨간 네모
       wrongItems.forEach(it => {
         document.querySelectorAll(`.graph-horiz .cell[data-item="${it}"]`).forEach(c => c.classList.add('row-wrong'));
         const yLabel = document.querySelector(`.graph-horiz .y-label[data-item="${it}"]`);
@@ -1950,7 +1922,6 @@ function renderActivity5() {
       <h3 style="font-size:21px; font-weight:700; color:#78350f; flex-shrink:0;">🤔 그래프를 보고 답해봐요!</h3>
       
       <div style="display:flex; gap:12px; flex:1; min-height:0;">
-        <!-- 질문 1 -->
         <div style="flex:1; background:#fff; border:3px solid #fbbf24; border-radius:14px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; min-height:0;">
           <div style="font-size:18px; font-weight:700; color:#92400e; line-height:1.4;">
             ❶ 가장 <span style="color:#dc2626;">많은</span> 학생이 좋아하는 동물은?
@@ -1966,7 +1937,6 @@ function renderActivity5() {
           <div id="q1-feedback" style="font-size:15px; font-weight:700; min-height:24px; flex-shrink:0;"></div>
         </div>
         
-        <!-- 질문 2 -->
         <div style="flex:1; background:#fff; border:3px solid #60a5fa; border-radius:14px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; min-height:0;">
           <div style="font-size:18px; font-weight:700; color:#1e40af; line-height:1.4;">
             ❷ 가장 <span style="color:#2563eb;">적은</span> 학생이 좋아하는 동물은?
@@ -1998,7 +1968,6 @@ function renderActivity5() {
       const target = q === '1' ? maxItem : minItem;
       const fb = document.getElementById(`q${q}-feedback`);
       
-      // 모든 옵션 색깔 초기화
       document.querySelectorAll(`.q-opt[data-q="${q}"]`).forEach(b => {
         b.style.background = '#fff';
         b.style.borderColor = q === '1' ? '#fef3c7' : '#dbeafe';
@@ -2020,7 +1989,6 @@ function renderActivity5() {
         answers[q] = false;
       }
       
-      // 둘 다 정답이면 다음 버튼 활성화
       if (answers[1] && answers[2]) {
         const nextBtn = document.getElementById('next-btn');
         nextBtn.disabled = false;
@@ -2133,7 +2101,6 @@ function showQuizFeedback(correct, desc) {
   } else {
     document.getElementById('modal-retry').addEventListener('click', () => {
       overlay.remove();
-      // 마지막 답을 정답이 아닌 걸로 처리해서 다시 풀기
       state.quizAnswers.pop();
       showQuizQuestion();
     });
@@ -2142,6 +2109,8 @@ function showQuizFeedback(correct, desc) {
 
 // ========================
 // 사후 녹음
+// ★ 변경: 맨 위 튜토리얼 박스 제거 (질문 박스만 남김)
+// ★ 변경: 마이크 아래에만 활동 방법 안내
 // ========================
 function renderPostRecord() {
   state.phase = 'post';
@@ -2152,7 +2121,6 @@ function renderPostRecord() {
   const p = state.problems.post;
   const maxVal = Math.max(...p.values);
   
-  // 표와 그래프를 함께 보여줌 (사전과 동일한 자료, 그래프 추가)
   const tableHtml = `
     <div style="background:#fff; border-radius:12px; padding:8px 14px; border:2px solid #c4b5fd;">
       <div style="text-align:center; margin-bottom:6px;"><span style="background:#7c3aed; color:#fff; padding:4px 12px; border-radius:10px; font-weight:700; font-size:14px;">📋 표</span></div>
@@ -2333,7 +2301,6 @@ function renderCertificate() {
     </div>
   `;
   
-  // 수료증 저장 (이미지로 다운로드)
   document.getElementById('save-btn').addEventListener('click', async () => {
     const certEl = document.getElementById('cert-content');
     const saveBtn = document.getElementById('save-btn');
@@ -2341,14 +2308,12 @@ function renderCertificate() {
     saveBtn.textContent = '저장 중...';
     
     try {
-      // html2canvas로 이미지 생성
       const canvas = await html2canvas(certEl, {
         backgroundColor: '#fffbeb',
-        scale: 2, // 고화질
+        scale: 2,
         useCORS: true
       });
       
-      // 다운로드
       const link = document.createElement('a');
       link.download = `수료증_${state.student.name}_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.png`;
       link.href = canvas.toDataURL('image/png');
