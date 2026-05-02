@@ -199,20 +199,30 @@
   
   /* ---- 분류 활동 ---- */
   .classify-wrap { display: flex; gap: 12px; flex: 1; min-height: 0; }
-  .classify-source { flex: 0 0 220px; background: #fff; border-radius: 18px; padding: 14px; border: 4px dashed #cbd5e1; overflow-y: auto; display: flex; flex-direction: column; }
-  .classify-source h4 { font-size: 19px; font-weight: 700; color: #475569; text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px dashed #e2e8f0; flex-shrink: 0; }
-  .source-items { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-content: flex-start; flex: 1; overflow-y: auto; }
+  .classify-source { flex: 0 0 280px; background: #fff; border-radius: 18px; padding: 12px; border: 4px dashed #cbd5e1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .classify-source h4 { font-size: 19px; font-weight: 700; color: #475569; text-align: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px dashed #e2e8f0; flex-shrink: 0; }
+  .source-items { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 4px; 
+    justify-items: center; 
+    align-content: flex-start; 
+    flex: 1; 
+    overflow: hidden;
+  }
   .source-item {
-    font-size: 44px; padding: 4px;
+    font-size: 34px; padding: 2px;
     cursor: grab; user-select: none;
     transition: all 0.15s; line-height: 1;
-    border-radius: 12px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; aspect-ratio: 1;
   }
   .source-item:active { cursor: grabbing; transform: scale(1.2); }
   .source-item.used { opacity: 0.2; pointer-events: none; }
   .source-item.selected { 
     background: #fde68a; 
-    transform: scale(1.25); 
+    transform: scale(1.2); 
     box-shadow: 0 0 0 4px #f59e0b, 0 8px 16px rgba(245,158,11,0.4);
     animation: selectedPulse 1s infinite;
   }
