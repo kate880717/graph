@@ -1672,21 +1672,21 @@ function renderActivity5() {
   const reversedItems = [...a.items].reverse();
   
   const vertHtml = `
-    <div style="background:#fdf2f8; border-radius:14px; padding:10px; border:2px solid #f9a8d4;">
-      <div style="text-align:center; background:#ec4899; color:#fff; padding:4px 10px; border-radius:10px; font-weight:900; font-size:13px; display:inline-block; margin-bottom:6px;">세로 ○ 그래프</div>
-      <div style="display:grid; grid-template-columns: 36px repeat(${a.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 22px) 40px;">
+    <div style="background:#fdf2f8; border-radius:14px; padding:12px; border:2px solid #f9a8d4;">
+      <div style="text-align:center; background:#ec4899; color:#fff; padding:6px 14px; border-radius:12px; font-weight:700; font-size:15px; display:inline-block; margin-bottom:8px;">세로 ○ 그래프</div>
+      <div style="display:grid; grid-template-columns: 40px repeat(${a.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 22px) 48px;">
         ${(() => {
           let html = '';
           for (let y = maxVal; y >= 1; y--) {
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;background:#fce7f3;color:#831843;border:1px solid #f9a8d4;">${y}</div>`;
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;background:#fce7f3;color:#831843;border:1px solid #f9a8d4;">${y}</div>`;
             a.items.forEach((it, i) => {
               const filled = a.values[i] >= y;
-              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#ec4899;border:1px solid #fbcfe8;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#ec4899;border:1px solid #fbcfe8;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
             });
           }
           html += `<div style="background:#fce7f3;border:1px solid #f9a8d4;"></div>`;
           a.items.forEach(it => {
-            html += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:11px;background:#fce7f3;color:#831843;border:1px solid #f9a8d4;"><span style="font-size:18px;line-height:1">${getEmoji(it)}</span><span>${it}</span></div>`;
+            html += `<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:4px;font-weight:700;font-size:15px;background:#fce7f3;color:#831843;border:1px solid #f9a8d4;"><span style="font-size:22px;line-height:1">${getEmoji(it)}</span><span>${it}</span></div>`;
           });
           return html;
         })()}
@@ -1695,22 +1695,22 @@ function renderActivity5() {
   `;
   
   const horizHtml = `
-    <div style="background:#ecfdf5; border-radius:14px; padding:10px; border:2px solid #6ee7b7;">
-      <div style="text-align:center; background:#10b981; color:#fff; padding:4px 10px; border-radius:10px; font-weight:900; font-size:13px; display:inline-block; margin-bottom:6px;">가로 ✕ 그래프</div>
-      <div style="display:grid; grid-template-columns: 80px repeat(${maxVal}, 1fr); grid-template-rows: repeat(${a.items.length}, 22px) 30px;">
+    <div style="background:#ecfdf5; border-radius:14px; padding:12px; border:2px solid #6ee7b7;">
+      <div style="text-align:center; background:#10b981; color:#fff; padding:6px 14px; border-radius:12px; font-weight:700; font-size:15px; display:inline-block; margin-bottom:8px;">가로 ✕ 그래프</div>
+      <div style="display:grid; grid-template-columns: 100px repeat(${maxVal}, 1fr); grid-template-rows: repeat(${a.items.length}, 26px) 36px;">
         ${(() => {
           let html = '';
           reversedItems.forEach(it => {
             const idx = a.items.indexOf(it);
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;background:#d1fae5;color:#064e3b;border:1px solid #6ee7b7;gap:4px;"><span style="font-size:16px;line-height:1">${getEmoji(it)}</span>${it}</div>`;
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;background:#d1fae5;color:#064e3b;border:1px solid #6ee7b7;gap:5px;"><span style="font-size:22px;line-height:1">${getEmoji(it)}</span>${it}</div>`;
             for (let c = 1; c <= maxVal; c++) {
               const filled = a.values[idx] >= c;
-              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#ef4444;border:1px solid #a7f3d0;background:${filled?'#fef3c7':'#fff'};">${filled?'✕':''}</div>`;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#ef4444;border:1px solid #a7f3d0;background:${filled?'#fef3c7':'#fff'};">${filled?'✕':''}</div>`;
             }
           });
           html += `<div style="background:#d1fae5;border:1px solid #6ee7b7;"></div>`;
           for (let c = 1; c <= maxVal; c++) {
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;background:#d1fae5;color:#064e3b;border:1px solid #6ee7b7;">${c}</div>`;
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;background:#d1fae5;color:#064e3b;border:1px solid #6ee7b7;">${c}</div>`;
           }
           return html;
         })()}
@@ -1727,15 +1727,15 @@ function renderActivity5() {
       ${vertHtml}
       ${horizHtml}
     </div>
-    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:16px; padding:18px; border:3px solid #f59e0b; flex:1; display:flex; flex-direction:column; gap:8px; min-height:0;">
-      <h3 style="font-size:18px; font-weight:900; color:#78350f; display:flex; align-items:center; gap:8px;">
+    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:18px; padding:20px 26px; border:4px solid #f59e0b; flex:1; display:flex; flex-direction:column; gap:12px; min-height:0;">
+      <h3 style="font-size:24px; font-weight:700; color:#78350f; display:flex; align-items:center; gap:10px;">
         🤔 두 그래프에서 알 수 있는 것
-        <button onclick="say('가장 많은 학생이 좋아하는 동물은 ${maxItem}이고 ${Math.max(...a.values)}명이에요. 가장 적은 학생이 좋아하는 동물은 ${minItem}이고 ${Math.min(...a.values)}명이에요. 그래프는 한눈에 비교하기 정말 쉬워요.')" style="margin-left:auto; background:#f59e0b; color:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; font-size:16px;">🔊</button>
+        <button onclick="say('가장 많은 학생이 좋아하는 동물은 ${maxItem}이고 ${Math.max(...a.values)}명이에요. 가장 적은 학생이 좋아하는 동물은 ${minItem}이고 ${Math.min(...a.values)}명이에요. 그래프는 한눈에 비교하기 정말 쉬워요.')" style="margin-left:auto; background:#f59e0b; color:#fff; border:none; border-radius:50%; width:44px; height:44px; cursor:pointer; font-size:20px;">🔊</button>
       </h3>
-      <ul style="list-style:none; display:flex; flex-direction:column; gap:6px;">
-        <li style="font-size:16px; font-weight:800; color:#451a03;">✅ 가장 많은 학생이 좋아하는 동물: <span style="color:#dc2626; font-size:19px;">${getEmoji(maxItem)} ${maxItem} (${Math.max(...a.values)}명)</span></li>
-        <li style="font-size:16px; font-weight:800; color:#451a03;">✅ 가장 적은 학생이 좋아하는 동물: <span style="color:#2563eb; font-size:19px;">${getEmoji(minItem)} ${minItem} (${Math.min(...a.values)}명)</span></li>
-        <li style="font-size:16px; font-weight:800; color:#451a03;">✅ 그래프는 <span style="color:#9333ea;">한눈에 비교</span>하기 쉬워요!</li>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:12px;">
+        <li style="font-size:22px; font-weight:700; color:#451a03; line-height:1.5;">✅ 가장 많은 학생이 좋아하는 동물: <span style="color:#dc2626; font-size:26px;">${getEmoji(maxItem)} ${maxItem} (${Math.max(...a.values)}명)</span></li>
+        <li style="font-size:22px; font-weight:700; color:#451a03; line-height:1.5;">✅ 가장 적은 학생이 좋아하는 동물: <span style="color:#2563eb; font-size:26px;">${getEmoji(minItem)} ${minItem} (${Math.min(...a.values)}명)</span></li>
+        <li style="font-size:22px; font-weight:700; color:#451a03; line-height:1.5;">✅ 그래프는 <span style="color:#9333ea; font-size:26px;">한눈에 비교</span>하기 쉬워요!</li>
       </ul>
     </div>
     <div class="act-footer">
@@ -1843,21 +1843,21 @@ function renderPostRecord() {
   const maxVal = Math.max(...p.values);
   
   const graphHtml = `
-    <div style="background:#fff; border-radius:12px; padding:10px; border:2px solid #c4b5fd;">
-      <div style="text-align:center; margin-bottom:6px;"><span style="background:#7c3aed; color:#fff; padding:4px 12px; border-radius:10px; font-weight:900; font-size:13px;">${p.title}</span></div>
-      <div style="display:grid; grid-template-columns: 36px repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 18px) 38px;">
+    <div style="background:#fff; border-radius:14px; padding:12px; border:3px solid #c4b5fd;">
+      <div style="text-align:center; margin-bottom:8px;"><span style="background:#7c3aed; color:#fff; padding:6px 16px; border-radius:12px; font-weight:700; font-size:17px;">${p.title}</span></div>
+      <div style="display:grid; grid-template-columns: 44px repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 20px) 50px;">
         ${(() => {
           let html = '';
           for (let y = maxVal; y >= 1; y--) {
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${y}</div>`;
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${y}</div>`;
             p.items.forEach((it, i) => {
               const filled = p.values[i] >= y;
-              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#7c3aed;border:1px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#7c3aed;border:1px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
             });
           }
           html += `<div style="background:#ede9fe;border:1px solid #c4b5fd;"></div>`;
           p.items.forEach(it => {
-            html += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:11px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;"><span style="font-size:16px;line-height:1">${getEmoji(it)}</span><span>${it}</span></div>`;
+            html += `<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:18px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;"><span style="font-size:26px;line-height:1">${getEmoji(it)}</span><span>${it}</span></div>`;
           });
           return html;
         })()}
