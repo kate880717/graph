@@ -1853,21 +1853,21 @@ function renderPostRecord() {
   const maxVal = Math.max(...p.values);
   
   const graphHtml = `
-    <div style="background:#fff; border-radius:14px; padding:12px; border:3px solid #c4b5fd;">
-      <div style="text-align:center; margin-bottom:8px;"><span style="background:#7c3aed; color:#fff; padding:6px 16px; border-radius:12px; font-weight:700; font-size:17px;">${p.title}</span></div>
-      <div style="display:grid; grid-template-columns: 44px repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 20px) 50px;">
+    <div style="background:#fff; border-radius:14px; padding:10px; border:3px solid #c4b5fd;">
+      <div style="text-align:center; margin-bottom:6px;"><span style="background:#7c3aed; color:#fff; padding:5px 14px; border-radius:12px; font-weight:700; font-size:16px;">${p.title}</span></div>
+      <div style="display:grid; grid-template-columns: 40px repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 16px) 38px;">
         ${(() => {
           let html = '';
           for (let y = maxVal; y >= 1; y--) {
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${y}</div>`;
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${y}</div>`;
             p.items.forEach((it, i) => {
               const filled = p.values[i] >= y;
-              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#7c3aed;border:1px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#7c3aed;border:1px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
             });
           }
           html += `<div style="background:#ede9fe;border:1px solid #c4b5fd;"></div>`;
           p.items.forEach(it => {
-            html += `<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;font-weight:700;font-size:18px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;"><span style="font-size:26px;line-height:1">${getEmoji(it)}</span><span>${it}</span></div>`;
+            html += `<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:5px;font-weight:700;font-size:16px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;"><span style="font-size:22px;line-height:1">${getEmoji(it)}</span><span>${it}</span></div>`;
           });
           return html;
         })()}
@@ -1878,17 +1878,17 @@ function renderPostRecord() {
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('학습한 내용을 활용해 그래프를 보고 알 수 있는 것을 다시 말해보세요!')}
     <div class="record-wrap">
-      <div class="record-question">
-        <h3>${p.question}</h3>
+      <div class="record-question" style="padding:12px 70px;">
+        <h3 style="font-size:22px;">${p.question}</h3>
         <button class="speak-btn" onclick="say(\`${p.question}\`)" title="문제 읽어주기">🔊</button>
       </div>
       ${graphHtml}
       <div class="record-control">
-        <button class="mic-btn" id="mic-btn">🎤</button>
-        <div class="mic-status" id="mic-status">마이크 버튼을 눌러 시작해요</div>
+        <button class="mic-btn" id="mic-btn" style="width:70px; height:70px; font-size:32px;">🎤</button>
+        <div class="mic-status" id="mic-status" style="font-size:17px;">마이크 버튼을 눌러 시작해요</div>
       </div>
-      <div class="record-text-box empty" id="rec-text">여기에 말한 내용이 적혀요</div>
-      <div style="display:flex; gap:10px; align-items:center; justify-content:flex-end;">
+      <div class="record-text-box empty" id="rec-text" style="min-height:50px; max-height:60px; padding:10px 14px; font-size:18px;">여기에 말한 내용이 적혀요</div>
+      <div style="display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-shrink:0;">
         <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">학습 전후 비교 📊</button>
       </div>
     </div>
