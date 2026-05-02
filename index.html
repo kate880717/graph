@@ -151,33 +151,35 @@
   .tutorial {
     background: linear-gradient(135deg, #fffbeb, #fef3c7);
     border: 4px dashed #f59e0b; border-radius: 18px;
-    padding: 12px 18px; margin-bottom: 0;
+    padding: 14px 22px; margin-bottom: 0;
     display: flex; align-items: center; gap: 14px;
     flex-shrink: 0;
   }
-  .tutorial .lamp { font-size: 32px; flex-shrink: 0; line-height: 1; animation: lampWiggle 2s infinite; }
+  .tutorial .lamp { font-size: 38px; flex-shrink: 0; line-height: 1; animation: lampWiggle 2s infinite; }
   @keyframes lampWiggle { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
-  .tutorial .text { font-size: 19px; font-weight: 700; color: #92400e; line-height: 1.4; }
+  .tutorial .text { font-size: 22px; font-weight: 700; color: #92400e; line-height: 1.4; }
   .tutorial-speaker {
     margin-left: auto; flex-shrink: 0; background: #f59e0b; color: #fff;
-    border: none; border-radius: 50%; width: 42px; height: 42px;
-    cursor: pointer; font-size: 20px; transition: all 0.2s;
+    border: none; border-radius: 50%; width: 48px; height: 48px;
+    cursor: pointer; font-size: 22px; transition: all 0.2s;
+  }
+  .tutorial-speaker:hover { transform: scale(1.1); background: #d97706; }er; font-size: 20px; transition: all 0.2s;
   }
   .tutorial-speaker:hover { transform: scale(1.1); background: #d97706; }
   
   /* ---- 표 ---- */
-  .table-wrap { background: #fff; border-radius: 18px; padding: 14px 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 3px solid #e0e7ff; }
+  .table-wrap { background: #fff; border-radius: 18px; padding: 16px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 3px solid #e0e7ff; }
   table.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-  table.data-table th, table.data-table td { padding: 10px 6px; text-align: center; font-size: 19px; }
-  table.data-table th { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #831843; font-weight: 700; border-bottom: 3px solid #ec4899; font-size: 19px; }
+  table.data-table th, table.data-table td { padding: 12px 8px; text-align: center; font-size: 22px; }
+  table.data-table th { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #831843; font-weight: 700; border-bottom: 3px solid #ec4899; font-size: 22px; }
   table.data-table th:first-child { border-radius: 10px 0 0 0; }
   table.data-table th:last-child { border-radius: 0 10px 0 0; }
   table.data-table td { font-weight: 700; color: #1f2937; border-bottom: 1px solid #f3f4f6; }
-  table.data-table .num-cell { color: #4f46e5; font-size: 24px; font-weight: 700; }
+  table.data-table .num-cell { color: #4f46e5; font-size: 28px; font-weight: 700; }
   table.data-table .input-cell { background: #fef3c7; }
   table.data-table input.cell-input {
-    width: 70px; padding: 8px; font-size: 22px; font-weight: 700; text-align: center;
-    border: 3px solid #f59e0b; border-radius: 10px; background: #fff; font-family: inherit; color: #4f46e5;
+    width: 80px; padding: 10px; font-size: 26px; font-weight: 700; text-align: center;
+    border: 3px solid #f59e0b; border-radius: 12px; background: #fff; font-family: inherit; color: #4f46e5;
   }
   table.data-table input.cell-input:focus { outline: none; border-color: #4f46e5; background: #eef2ff; }
   table.data-table input.cell-input.correct { border-color: #10b981; background: #dcfce7; color: #047857; }
@@ -186,22 +188,22 @@
   /* 분류 결과 미리보기 (활동2에서 보여줌) */
   .classify-preview {
     background: #fff; border: 3px solid #fcd34d; border-radius: 16px;
-    padding: 10px 16px; flex-shrink: 0;
+    padding: 12px 18px; flex-shrink: 0;
   }
-  .classify-preview h4 { font-size: 17px; font-weight: 700; color: #92400e; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .classify-preview h4 { font-size: 19px; font-weight: 700; color: #92400e; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
   .classify-preview .preview-row { display: flex; gap: 12px; justify-content: space-around; align-items: center; flex-wrap: nowrap; }
-  .preview-col { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 6px 12px; background: #fffbeb; border-radius: 12px; border: 2px solid #fef3c7; }
-  .preview-col .label { color: #92400e; font-size: 16px; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
-  .preview-col .label .em { font-size: 22px; line-height: 1; }
-  .preview-col .num { background: #ec4899; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 18px; font-weight: 700; }
+  .preview-col { display: flex; flex-direction: row; align-items: center; gap: 10px; padding: 8px 16px; background: #fffbeb; border-radius: 14px; border: 2px solid #fef3c7; }
+  .preview-col .label { color: #92400e; font-size: 19px; font-weight: 700; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  .preview-col .label .em { font-size: 28px; line-height: 1; }
+  .preview-col .num { background: #ec4899; color: #fff; padding: 6px 16px; border-radius: 14px; font-size: 22px; font-weight: 700; min-width: 56px; text-align: center; }
   
   /* ---- 분류 활동 ---- */
   .classify-wrap { display: flex; gap: 12px; flex: 1; min-height: 0; }
-  .classify-source { flex: 0 0 220px; background: #fff; border-radius: 18px; padding: 12px; border: 4px dashed #cbd5e1; overflow-y: auto; display: flex; flex-direction: column; }
-  .classify-source h4 { font-size: 17px; font-weight: 700; color: #475569; text-align: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px dashed #e2e8f0; flex-shrink: 0; }
-  .source-items { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-content: flex-start; flex: 1; overflow-y: auto; }
+  .classify-source { flex: 0 0 220px; background: #fff; border-radius: 18px; padding: 14px; border: 4px dashed #cbd5e1; overflow-y: auto; display: flex; flex-direction: column; }
+  .classify-source h4 { font-size: 19px; font-weight: 700; color: #475569; text-align: center; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px dashed #e2e8f0; flex-shrink: 0; }
+  .source-items { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-content: flex-start; flex: 1; overflow-y: auto; }
   .source-item {
-    font-size: 38px; padding: 4px;
+    font-size: 44px; padding: 4px;
     cursor: grab; user-select: none;
     transition: all 0.15s; line-height: 1;
     border-radius: 12px;
@@ -218,17 +220,17 @@
   
   .classify-targets { flex: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; min-width: 0; }
   .classify-bin {
-    background: #fff; border-radius: 16px; padding: 8px;
+    background: #fff; border-radius: 16px; padding: 10px;
     display: flex; flex-direction: column; align-items: center;
     border: 4px solid; transition: all 0.2s; min-height: 0; min-width: 0;
     cursor: pointer;
   }
   .classify-bin.drag-over, .classify-bin.can-drop { transform: scale(1.04); background: #fef3c7; }
-  .classify-bin .bin-label { font-size: 17px; font-weight: 700; padding: 6px 12px; border-radius: 14px; margin-bottom: 6px; flex-shrink: 0; white-space: nowrap; }
+  .classify-bin .bin-label { font-size: 21px; font-weight: 700; padding: 8px 14px; border-radius: 14px; margin-bottom: 8px; flex-shrink: 0; white-space: nowrap; }
   .classify-bin .bin-area { flex: 1; width: 100%; display: flex; flex-direction: column-reverse; align-items: center; gap: 2px; padding: 4px 0; overflow-y: auto; min-height: 0; border-top: 2px dashed #e5e7eb; }
-  .classify-bin .bin-area .dropped { font-size: 30px; animation: pop 0.3s; line-height: 1; }
+  .classify-bin .bin-area .dropped { font-size: 36px; animation: pop 0.3s; line-height: 1; }
   @keyframes pop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
-  .classify-bin .count { font-size: 18px; font-weight: 700; padding: 5px 12px; border-radius: 12px; background: #f3f4f6; color: #374151; flex-shrink: 0; margin-top: 4px; }
+  .classify-bin .count { font-size: 22px; font-weight: 700; padding: 6px 16px; border-radius: 14px; background: #f3f4f6; color: #374151; flex-shrink: 0; margin-top: 6px; }
   
   /* ---- 그래프 (세로 / 가로) ---- */
   .graph-vert {
@@ -236,80 +238,92 @@
     border: 3px solid #fce7f3;
     flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
   }
-  .graph-vert .gtitle { text-align: center; background: linear-gradient(90deg, #ec4899, #f43f5e); color: #fff; padding: 6px 18px; border-radius: 14px; font-weight: 700; font-size: 17px; margin: 0 auto 8px; flex-shrink: 0; }
+  .graph-vert .gtitle { text-align: center; background: linear-gradient(90deg, #ec4899, #f43f5e); color: #fff; padding: 8px 22px; border-radius: 14px; font-weight: 700; font-size: 20px; margin: 0 auto 10px; flex-shrink: 0; }
   .graph-vert .grid { flex: 1; display: grid; gap: 0; min-height: 0; }
-  .graph-vert .y-label { background: #fce7f3; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #831843; font-size: 20px; border: 1px solid #f9a8d4; }
+  .graph-vert .y-label { background: #fce7f3; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #831843; font-size: 22px; border: 1px solid #f9a8d4; }
   .graph-vert .cell {
     background: #fff; border: 1px solid #fbcfe8; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 28px; user-select: none;
+    font-size: 32px; user-select: none;
     transition: all 0.1s;
   }
   .graph-vert .cell:hover { background: #fdf2f8; }
   .graph-vert .cell.filled { background: #fef3c7; }
   .graph-vert .x-corner { background: #fce7f3; border: 1px solid #f9a8d4; position: relative; }
-  .graph-vert .x-corner::before { content: '학생수(명)'; font-size: 12px; position: absolute; top: 4px; left: 4px; color: #831843; font-weight: 700; }
-  .graph-vert .x-corner::after { content: '동물'; font-size: 13px; position: absolute; bottom: 4px; right: 4px; color: #831843; font-weight: 700; }
+  .graph-vert .x-corner::before { content: '학생수(명)'; font-size: 13px; position: absolute; top: 4px; left: 4px; color: #831843; font-weight: 700; }
+  .graph-vert .x-corner::after { content: '동물'; font-size: 14px; position: absolute; bottom: 4px; right: 4px; color: #831843; font-weight: 700; }
   .graph-vert .x-corner svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-  .graph-vert .x-label { background: #fce7f3; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; color: #831843; font-size: 16px; border: 1px solid #f9a8d4; gap: 2px; }
-  .graph-vert .x-label .em { font-size: 24px; line-height: 1; }
+  .graph-vert .x-label { background: #fce7f3; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; color: #831843; font-size: 18px; border: 1px solid #f9a8d4; gap: 2px; }
+  .graph-vert .x-label .em { font-size: 28px; line-height: 1; }
   
   /* 가로 그래프 */
   .graph-horiz { background: #fff; border-radius: 18px; padding: 12px; border: 3px solid #d1fae5; flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-  .graph-horiz .gtitle { text-align: center; background: linear-gradient(90deg, #10b981, #059669); color: #fff; padding: 6px 18px; border-radius: 14px; font-weight: 700; font-size: 17px; margin: 0 auto 8px; flex-shrink: 0; }
+  .graph-horiz .gtitle { text-align: center; background: linear-gradient(90deg, #10b981, #059669); color: #fff; padding: 8px 22px; border-radius: 14px; font-weight: 700; font-size: 20px; margin: 0 auto 10px; flex-shrink: 0; }
   .graph-horiz .grid { flex: 1; display: grid; gap: 0; min-height: 0; }
-  .graph-horiz .y-label { background: #d1fae5; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #064e3b; font-size: 18px; border: 1px solid #6ee7b7; gap: 6px; }
-  .graph-horiz .y-label .em { font-size: 26px; line-height: 1; }
-  .graph-horiz .cell { background: #fff; border: 1px solid #a7f3d0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 28px; user-select: none; transition: all 0.1s; }
+  .graph-horiz .y-label { background: #d1fae5; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #064e3b; font-size: 20px; border: 1px solid #6ee7b7; gap: 6px; }
+  .graph-horiz .y-label .em { font-size: 30px; line-height: 1; }
+  .graph-horiz .cell { background: #fff; border: 1px solid #a7f3d0; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 32px; user-select: none; transition: all 0.1s; }
   .graph-horiz .cell:hover { background: #ecfdf5; }
   .graph-horiz .cell.filled { background: #fef3c7; color: #ef4444; font-weight: 900; }
-  .graph-horiz .x-label { background: #d1fae5; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #064e3b; font-size: 20px; border: 1px solid #6ee7b7; }
+  .graph-horiz .x-label { background: #d1fae5; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #064e3b; font-size: 22px; border: 1px solid #6ee7b7; }
   .graph-horiz .x-corner { background: #d1fae5; border: 1px solid #6ee7b7; position: relative; }
-  .graph-horiz .x-corner::before { content: '동물'; font-size: 13px; position: absolute; top: 4px; left: 4px; color: #064e3b; font-weight: 700; }
-  .graph-horiz .x-corner::after { content: '학생수(명)'; font-size: 12px; position: absolute; bottom: 4px; right: 4px; color: #064e3b; font-weight: 700; }
+  .graph-horiz .x-corner::before { content: '동물'; font-size: 14px; position: absolute; top: 4px; left: 4px; color: #064e3b; font-weight: 700; }
+  .graph-horiz .x-corner::after { content: '학생수(명)'; font-size: 13px; position: absolute; bottom: 4px; right: 4px; color: #064e3b; font-weight: 700; }
+  
+  /* 표 참고 박스 (그래프 화면) */
+  .ref-table {
+    background: #fff; border: 3px solid #c7d2fe; border-radius: 14px;
+    padding: 8px 14px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .ref-table .ref-label { background: #4f46e5; color: #fff; padding: 6px 14px; border-radius: 12px; font-size: 17px; font-weight: 700; flex-shrink: 0; }
+  .ref-table .ref-items { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; justify-content: center; }
+  .ref-item { display: flex; align-items: center; gap: 6px; padding: 4px 12px; background: #eef2ff; border-radius: 10px; border: 2px solid #c7d2fe; font-size: 18px; font-weight: 700; color: #3730a3; }
+  .ref-item .em { font-size: 26px; line-height: 1; }
+  .ref-item .n { color: #ec4899; font-size: 22px; font-weight: 700; }
   
   /* ---- 활동 푸터 ---- */
-  .act-footer { display: flex; align-items: center; gap: 12px; padding-top: 4px; flex-shrink: 0; }
-  .act-status { flex: 1; background: #fff; padding: 12px 20px; border-radius: 14px; font-weight: 700; font-size: 18px; border: 3px solid #e5e7eb; color: #6b7280; display: flex; align-items: center; gap: 10px; min-height: 56px; }
+  .act-footer { display: flex; align-items: center; gap: 12px; padding-top: 6px; flex-shrink: 0; }
+  .act-status { flex: 1; background: #fff; padding: 14px 22px; border-radius: 14px; font-weight: 700; font-size: 20px; border: 3px solid #e5e7eb; color: #6b7280; display: flex; align-items: center; gap: 10px; min-height: 60px; }
   .act-status.ok { background: linear-gradient(90deg, #dcfce7, #bbf7d0); border-color: #86efac; color: #14532d; }
   .act-status.bad { background: linear-gradient(90deg, #fee2e2, #fecaca); border-color: #fca5a5; color: #7f1d1d; }
   .act-status.hint { background: linear-gradient(90deg, #fef3c7, #fde68a); border-color: #f59e0b; color: #78350f; }
-  .btn { padding: 12px 26px; font-size: 19px; }
+  .btn { padding: 14px 28px; font-size: 21px; }
   .btn-lg { padding: 18px 42px; font-size: 24px; }
   
   /* ---- 녹음 화면 ---- */
   .record-wrap { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; overflow: hidden; }
-  .record-question { background: linear-gradient(135deg, #ede9fe, #ddd6fe); padding: 14px 60px; border-radius: 18px; border: 4px solid #a78bfa; text-align: center; flex-shrink: 0; position: relative; }
-  .record-question h3 { font-size: 22px; font-weight: 700; color: #4c1d95; line-height: 1.3; }
-  .record-question .speak-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: #7c3aed; color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 20px; box-shadow: 0 3px 0 #5b21b6; }
+  .record-question { background: linear-gradient(135deg, #ede9fe, #ddd6fe); padding: 14px 70px; border-radius: 18px; border: 4px solid #a78bfa; text-align: center; flex-shrink: 0; position: relative; }
+  .record-question h3 { font-size: 26px; font-weight: 700; color: #4c1d95; line-height: 1.3; }
+  .record-question .speak-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: #7c3aed; color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; cursor: pointer; font-size: 22px; box-shadow: 0 3px 0 #5b21b6; }
   
-  .record-table { background: #fff; border-radius: 16px; padding: 10px 14px; border: 3px solid #c4b5fd; flex-shrink: 0; }
-  .record-table .ttitle-row { text-align: center; margin-bottom: 6px; }
-  .record-table .ttitle { background: #7c3aed; color: #fff; padding: 6px 16px; border-radius: 12px; font-weight: 700; font-size: 16px; display: inline-block; }
+  .record-table { background: #fff; border-radius: 16px; padding: 12px 16px; border: 3px solid #c4b5fd; flex-shrink: 0; }
+  .record-table .ttitle-row { text-align: center; margin-bottom: 8px; }
+  .record-table .ttitle { background: #7c3aed; color: #fff; padding: 8px 18px; border-radius: 14px; font-weight: 700; font-size: 19px; display: inline-block; }
   .record-table table { width: 100%; }
-  .record-table th, .record-table td { padding: 6px 4px; text-align: center; font-size: 17px; font-weight: 700; }
+  .record-table th, .record-table td { padding: 8px 4px; text-align: center; font-size: 20px; font-weight: 700; }
   .record-table th { background: #f3e8ff; color: #6b21a8; }
-  .record-table .num-cell { color: #7c3aed; font-size: 22px; }
-  .record-table .em { font-size: 24px; line-height: 1; }
+  .record-table .num-cell { color: #7c3aed; font-size: 26px; }
+  .record-table .em { font-size: 30px; line-height: 1; }
   
-  .record-control { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+  .record-control { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; }
   .mic-btn {
-    width: 78px; height: 78px; border-radius: 50%;
+    width: 80px; height: 80px; border-radius: 50%;
     background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; border: none; cursor: pointer;
-    font-size: 36px; transition: all 0.2s;
+    font-size: 38px; transition: all 0.2s;
     box-shadow: 0 6px 0 #991b1b, 0 10px 20px rgba(239,68,68,0.4);
   }
   .mic-btn:hover { transform: translateY(-2px); }
   .mic-btn.recording { animation: pulse 1.2s infinite; background: linear-gradient(135deg, #f43f5e, #e11d48); }
   @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 6px 0 #991b1b, 0 0 0 0 rgba(239,68,68,0.5); } 50% { transform: scale(1.08); box-shadow: 0 6px 0 #991b1b, 0 0 0 14px rgba(239,68,68,0); } }
-  .mic-status { font-size: 17px; font-weight: 700; color: #6b7280; }
+  .mic-status { font-size: 19px; font-weight: 700; color: #6b7280; }
   .mic-status.live { color: #dc2626; }
   
-  .record-text-box { background: #fff; border: 3px solid #e0e7ff; border-radius: 14px; padding: 12px 16px; min-height: 56px; max-height: 80px; font-size: 18px; font-weight: 600; color: #1f2937; line-height: 1.5; flex: 0 1 auto; overflow-y: auto; }
+  .record-text-box { background: #fff; border: 3px solid #e0e7ff; border-radius: 14px; padding: 12px 16px; min-height: 60px; max-height: 80px; font-size: 20px; font-weight: 600; color: #1f2937; line-height: 1.5; flex: 0 1 auto; overflow-y: auto; }
   .record-text-box.empty { color: #9ca3af; font-weight: 600; font-style: italic; display: flex; align-items: center; justify-content: center; }
   
-  .sample-toggle { background: #fef3c7; border: 3px dashed #f59e0b; padding: 8px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 16px; color: #92400e; font-family: inherit; }
-  .sample-content { background: #fefce8; border-left: 5px solid #f59e0b; padding: 10px 14px; border-radius: 8px; font-size: 17px; color: #713f12; line-height: 1.5; font-weight: 600; margin-top: 4px; }
+  .sample-toggle { background: #fef3c7; border: 3px dashed #f59e0b; padding: 10px 22px; border-radius: 14px; cursor: pointer; font-weight: 700; font-size: 19px; color: #92400e; font-family: inherit; }
+  .sample-content { background: #fefce8; border-left: 5px solid #f59e0b; padding: 12px 16px; border-radius: 10px; font-size: 20px; color: #713f12; line-height: 1.5; font-weight: 600; margin-top: 4px; }
   
   /* ---- 퀴즈 ---- */
   .quiz-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 0 60px; }
@@ -1290,7 +1304,7 @@ function placeItem(itName, id) {
 }
 
 // ========================
-// 활동 2: 표 완성 (분류 결과 미리보기 추가)
+// 활동 2: 표 완성 (분류 결과 미리보기 + 합계 자동 + 힌트)
 // ========================
 function renderActivity2() {
   state.phase = 'act2';
@@ -1300,20 +1314,16 @@ function renderActivity2() {
   
   const a = state.problems.activity;
   
-  // 분류 결과 미리보기 HTML
+  // 분류 결과 미리보기 (가로 한 줄로)
   const previewHtml = `
     <div class="classify-preview">
-      <h4>📝 앞에서 분류한 결과를 확인해보세요</h4>
+      <h4>📝 앞에서 분류한 결과</h4>
       <div class="preview-row">
         ${a.items.map((it, i) => {
           const count = state.classifyData[it] || 0;
           return `
             <div class="preview-col">
-              <div class="label">${getEmoji(it)} ${it}</div>
-              <div class="stack">
-                ${Array.from({length: Math.min(count, 5)}).map(() => `<span>${getEmoji(it)}</span>`).join('')}
-                ${count > 5 ? `<span style="font-size:18px; color:#ec4899; font-weight:900;">+${count-5}</span>` : ''}
-              </div>
+              <div class="label"><span class="em">${getEmoji(it)}</span>${it}</div>
               <div class="num">${count}마리</div>
             </div>
           `;
@@ -1323,16 +1333,16 @@ function renderActivity2() {
   `;
   
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML('앞에서 분류한 동물의 수를 표 빈칸에 적어보세요. 왼쪽의 분류 결과를 확인하면서 적으세요!')}
+    ${tutorialHTML('위의 분류 결과를 보고, 표 빈칸에 숫자를 적어보세요. 합계는 자동으로 계산돼요!')}
     ${previewHtml}
     <div style="flex:1; display:flex; align-items:center; justify-content:center;">
-      <div class="table-wrap" style="max-width:1000px; width:100%;">
-        <h3 style="text-align:center; font-size:24px; font-weight:700; color:#831843; margin-bottom:14px;">${a.title}</h3>
+      <div class="table-wrap" style="max-width:1100px; width:100%;">
+        <h3 style="text-align:center; font-size:21px; font-weight:700; color:#831843; margin-bottom:10px;">${a.title}</h3>
         <table class="data-table">
           <thead>
             <tr>
               <th>동물</th>
-              ${a.items.map(it => `<th><span style="font-size:28px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
+              ${a.items.map(it => `<th><span style="font-size:26px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
               <th>합계</th>
             </tr>
           </thead>
@@ -1340,40 +1350,69 @@ function renderActivity2() {
             <tr>
               <td>학생 수(명)</td>
               ${a.items.map(it => `<td class="input-cell"><input type="number" min="0" max="50" class="cell-input" data-item="${it}" placeholder="?"></td>`).join('')}
-              <td class="input-cell"><input type="number" min="0" max="100" class="cell-input" data-item="__sum" placeholder="?"></td>
+              <td class="input-cell" style="background:#dbeafe;"><span id="auto-sum" style="font-size:26px; font-weight:700; color:#4f46e5;">0</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
     <div class="act-footer">
-      <div class="act-status" id="act-status">분류한 동물 수를 빈칸에 적어주세요</div>
+      <div class="act-status" id="act-status">위의 분류 결과를 보고 빈칸을 채워주세요</div>
       <button class="btn btn-success" id="check-btn">정답 확인 ✅</button>
     </div>
   `;
   
+  // 합계 자동 계산
+  function updateAutoSum() {
+    let sum = 0;
+    document.querySelectorAll('.cell-input').forEach(inp => {
+      const v = parseInt(inp.value);
+      if (!isNaN(v)) sum += v;
+    });
+    document.getElementById('auto-sum').textContent = sum;
+  }
+  
+  document.querySelectorAll('.cell-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      // 초기화: 색깔 원복
+      inp.classList.remove('correct', 'wrong');
+      updateAutoSum();
+    });
+  });
+  
   document.getElementById('check-btn').addEventListener('click', () => {
     let allCorrect = true;
+    let firstWrong = null;
+    let emptyCount = 0;
+    
     a.items.forEach((it, i) => {
       const inp = document.querySelector(`.cell-input[data-item="${it}"]`);
       const v = parseInt(inp.value);
-      if (v !== a.values[i]) {
+      if (isNaN(v)) {
+        emptyCount++;
         allCorrect = false;
-        inp.style.borderColor = '#ef4444'; inp.style.background = '#fef2f2';
+        if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: '?' };
+      } else if (v !== a.values[i]) {
+        allCorrect = false;
+        inp.classList.add('wrong');
+        inp.classList.remove('correct');
+        if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: v };
       } else {
-        inp.style.borderColor = '#10b981'; inp.style.background = '#dcfce7';
+        inp.classList.add('correct');
+        inp.classList.remove('wrong');
       }
     });
-    const sumInp = document.querySelector('.cell-input[data-item="__sum"]');
-    const expectedSum = a.values.reduce((s,v)=>s+v,0);
-    if (parseInt(sumInp.value) !== expectedSum) {
-      allCorrect = false;
-      sumInp.style.borderColor = '#ef4444'; sumInp.style.background = '#fef2f2';
-    } else {
-      sumInp.style.borderColor = '#10b981'; sumInp.style.background = '#dcfce7';
-    }
     
     const status = document.getElementById('act-status');
+    
+    if (emptyCount > 0 && emptyCount === a.items.length) {
+      status.innerHTML = '⚠️ 빈칸을 모두 채워주세요!';
+      status.className = 'act-status bad';
+      playSound('wrong');
+      say('빈칸을 모두 채워주세요.');
+      return;
+    }
+    
     if (allCorrect) {
       status.textContent = '🎉 표를 완벽하게 완성했어요!';
       status.className = 'act-status ok';
@@ -1382,18 +1421,22 @@ function renderActivity2() {
       say('표를 완벽하게 완성했어요! 이제 그래프를 그려 봐요.');
       setTimeout(() => renderActivity3(), 1800);
     } else {
-      status.textContent = '😅 빨간색 칸의 숫자를 다시 확인해보세요!';
-      status.className = 'act-status bad';
+      // 힌트 제공
+      if (firstWrong) {
+        const realCount = state.classifyData[firstWrong.name] || firstWrong.expected;
+        status.innerHTML = `💡 힌트: 위의 ${getEmoji(firstWrong.name)} ${firstWrong.name} 분류함을 다시 세어보세요! (${realCount}마리예요)`;
+        status.className = 'act-status hint';
+        say(`${firstWrong.name} 분류함을 다시 세어보세요. ${realCount}마리예요.`);
+      }
       playSound('wrong');
-      say('빨간색 칸의 숫자를 다시 확인해보세요.');
     }
   });
   
-  setTimeout(() => say('앞에서 분류한 동물 수를 표 빈칸에 적어주세요. 왼쪽의 분류 결과를 확인하면서 적으세요!'), 400);
+  setTimeout(() => say('위에 분류한 결과를 보고, 표 빈칸에 숫자를 적어주세요. 합계는 자동으로 계산돼요.'), 400);
 }
 
 // ========================
-// 활동 3: 세로 그래프 (○)
+// 활동 3: 세로 그래프 (○) - 표 참고 박스 포함
 // ========================
 function renderActivity3() {
   state.phase = 'act3';
@@ -1409,8 +1452,21 @@ function renderActivity3() {
   const yLabels = [];
   for (let y = maxVal; y >= 1; y--) yLabels.push(y);
   
+  // 표 참고 박스 HTML
+  const refTableHtml = `
+    <div class="ref-table">
+      <div class="ref-label">📋 표 참고</div>
+      <div class="ref-items">
+        ${a.items.map((it, i) => `
+          <div class="ref-item"><span class="em">${getEmoji(it)}</span>${it}: <span class="n">${a.values[i]}</span></div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML('아래 칸을 클릭해서 ○를 그려주세요! 한 칸에 ○ 한 개씩, 아래부터 빈틈없이 채우는 게 규칙이에요.')}
+    ${tutorialHTML('아래 칸을 클릭해서 ○를 그려주세요! 한 칸에 ○ 한 개씩, 아래부터 빈틈없이 채워요. 위의 표를 참고해요!')}
+    ${refTableHtml}
     <div class="graph-vert" id="graph-area">
       <div class="gtitle">${a.title}</div>
       <div class="grid" id="grid" style="grid-template-columns: 60px repeat(${a.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 1fr) 60px;">
@@ -1423,7 +1479,7 @@ function renderActivity3() {
       </div>
     </div>
     <div class="act-footer">
-      <div class="act-status" id="act-status">표의 숫자만큼 ○를 그려주세요</div>
+      <div class="act-status" id="act-status">위의 표를 보고 그 숫자만큼 ○를 그려주세요</div>
       <button class="btn btn-warn" id="reset-btn">🔄 지우기</button>
       <button class="btn btn-success" id="check-btn">완성! ✅</button>
     </div>
@@ -1466,7 +1522,13 @@ function renderActivity3() {
   
   document.getElementById('check-btn').addEventListener('click', () => {
     let allCorrect = true;
-    a.items.forEach((it, i) => { if (state.vertGraph[it] !== a.values[i]) allCorrect = false; });
+    let firstWrong = null;
+    a.items.forEach((it, i) => {
+      if (state.vertGraph[it] !== a.values[i]) {
+        allCorrect = false;
+        if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: state.vertGraph[it] };
+      }
+    });
     const status = document.getElementById('act-status');
     if (allCorrect) {
       status.textContent = '🎉 완벽한 세로 그래프예요!';
@@ -1476,18 +1538,18 @@ function renderActivity3() {
       say('완벽한 세로 그래프예요! 이번엔 가로로 그려 봐요.');
       setTimeout(() => renderActivity4(), 1800);
     } else {
-      status.textContent = '😅 표의 숫자와 다시 비교해보세요!';
-      status.className = 'act-status bad';
+      status.innerHTML = `💡 힌트: ${getEmoji(firstWrong.name)} ${firstWrong.name}는 ${firstWrong.expected}개를 그려야 해요! (지금은 ${firstWrong.current}개)`;
+      status.className = 'act-status hint';
       playSound('wrong');
-      say('표의 숫자와 다시 비교해보세요.');
+      say(`${firstWrong.name}는 ${firstWrong.expected}개를 그려야 해요. 다시 확인해보세요.`);
     }
   });
   
-  setTimeout(() => say('표의 숫자만큼 동그라미를 그려보세요. 한 칸에 한 개씩, 아래부터 빈틈없이요.'), 400);
+  setTimeout(() => say('위의 표를 참고해서 표의 숫자만큼 동그라미를 그려보세요. 한 칸에 한 개씩, 아래부터 빈틈없이요.'), 400);
 }
 
 // ========================
-// 활동 4: 가로 그래프 (✕)
+// 활동 4: 가로 그래프 (✕) - 표 참고 박스 포함
 // ========================
 function renderActivity4() {
   state.phase = 'act4';
@@ -1502,8 +1564,21 @@ function renderActivity4() {
   const maxVal = Math.max(...a.values);
   const reversedItems = [...a.items].reverse();
   
+  // 표 참고 박스
+  const refTableHtml = `
+    <div class="ref-table">
+      <div class="ref-label">📋 표 참고</div>
+      <div class="ref-items">
+        ${a.items.map((it, i) => `
+          <div class="ref-item"><span class="em">${getEmoji(it)}</span>${it}: <span class="n">${a.values[i]}</span></div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML('이번에는 가로로! 동물 이름이 왼쪽에 있고, 학생 수가 아래에 있어요. ✕ 표시로 칸을 채워주세요!')}
+    ${tutorialHTML('이번에는 가로로! 동물이 왼쪽에, 수가 아래에 있어요. 위의 표를 참고해서 ✕를 그려주세요!')}
+    ${refTableHtml}
     <div class="graph-horiz" id="graph-area">
       <div class="gtitle">${a.title}</div>
       <div class="grid" id="grid" style="grid-template-columns: 110px repeat(${maxVal}, 1fr); grid-template-rows: repeat(${a.items.length}, 1fr) 50px;">
@@ -1516,7 +1591,7 @@ function renderActivity4() {
       </div>
     </div>
     <div class="act-footer">
-      <div class="act-status" id="act-status">표의 숫자만큼 ✕를 그려주세요 (왼쪽부터!)</div>
+      <div class="act-status" id="act-status">위의 표를 보고 그 숫자만큼 ✕를 그려주세요 (왼쪽부터!)</div>
       <button class="btn btn-warn" id="reset-btn">🔄 지우기</button>
       <button class="btn btn-success" id="check-btn">완성! ✅</button>
     </div>
@@ -1557,7 +1632,13 @@ function renderActivity4() {
   
   document.getElementById('check-btn').addEventListener('click', () => {
     let allCorrect = true;
-    a.items.forEach((it, i) => { if (state.horizGraph[it] !== a.values[i]) allCorrect = false; });
+    let firstWrong = null;
+    a.items.forEach((it, i) => {
+      if (state.horizGraph[it] !== a.values[i]) {
+        allCorrect = false;
+        if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: state.horizGraph[it] };
+      }
+    });
     const status = document.getElementById('act-status');
     if (allCorrect) {
       status.textContent = '🎉 가로 그래프도 완성!';
@@ -1567,14 +1648,14 @@ function renderActivity4() {
       say('가로 그래프도 완성! 정말 잘했어요. 이제 두 그래프를 비교해 봐요.');
       setTimeout(() => renderActivity5(), 1800);
     } else {
-      status.textContent = '😅 표의 숫자와 다시 비교해보세요!';
-      status.className = 'act-status bad';
+      status.innerHTML = `💡 힌트: ${getEmoji(firstWrong.name)} ${firstWrong.name}는 ${firstWrong.expected}개를 그려야 해요! (지금은 ${firstWrong.current}개)`;
+      status.className = 'act-status hint';
       playSound('wrong');
-      say('표의 숫자와 다시 비교해보세요.');
+      say(`${firstWrong.name}는 ${firstWrong.expected}개를 그려야 해요. 다시 확인해보세요.`);
     }
   });
   
-  setTimeout(() => say('이번에는 가로 그래프예요. 표의 숫자만큼 엑스를 그려주세요.'), 400);
+  setTimeout(() => say('이번에는 가로 그래프예요. 위의 표를 참고해서 표의 숫자만큼 엑스를 그려주세요.'), 400);
 }
 
 // ========================
