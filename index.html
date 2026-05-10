@@ -1778,6 +1778,15 @@ async function renderActivity4() {
     });
   });
   
+  // ★ 안전장치: 캐시 등으로 잘못된 상태가 남아있을 경우를 대비해
+  // 명시적으로 모든 버튼에서 active를 제거하고 첫 번째(❤️)만 active로 재설정
+  document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
+  const firstSymBtn = document.querySelector('.symbol-btn');
+  if (firstSymBtn) {
+    firstSymBtn.classList.add('active');
+    currentSymbol = firstSymBtn.dataset.sym;
+  }
+  
   document.querySelectorAll('.graph-horiz .cell').forEach(cell => {
     cell.addEventListener('click', () => {
       const it = cell.dataset.item;
