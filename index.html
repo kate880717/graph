@@ -1097,7 +1097,7 @@ function showConceptModal(opts) {
       </div>
     `;
     document.querySelector('.body').appendChild(overlay);
-    sayForce(opts.speak);
+    say(opts.speak);
     document.getElementById('concept-listen').addEventListener('click', () => sayForce(opts.speak));
     document.getElementById('concept-close').addEventListener('click', () => { tts.stop(); overlay.remove(); resolve(); });
   });
@@ -1556,11 +1556,11 @@ async function renderActivity4() {
       </div>
     </div>
   `;
-  let currentSymbol = '✕';
+  let currentSymbol = '❤️';
   const symbols = [
-    { sym: '✕', color: '#ef4444' }, { sym: '○', color: '#3b82f6' },
     { sym: '❤️', color: '' }, { sym: '⭐', color: '' },
-    { sym: '△', color: '#7c3aed' }, { sym: '☆', color: '#f59e0b' }
+    { sym: '☆', color: '#f59e0b' }, { sym: '△', color: '#7c3aed' },
+    { sym: '○', color: '#3b82f6' }, { sym: '✕', color: '#ef4444' }
   ];
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('동물이 왼쪽, 수가 아래에 있어요. 기호를 골라서 표의 숫자만큼 그려주세요!')}
@@ -1799,7 +1799,7 @@ function renderActivity5() {
   setTimeout(() => say('두 그래프를 잘 보고 답해보세요. 가장 많은 학생이 좋아하는 동물은 무엇인가요? 그리고 가장 적은 학생이 좋아하는 동물은 무엇인가요?'), 400);
 }
 
-// 중간 성찰
+// 중간 성찰 (★ 슬라이드 팝업 형식 - 한 화면에 한 가지씩 큰 글씨로)
 function renderReflection() {
   state.phase = 'reflect';
   updateHeader('💭', '잠깐, 배운 것을 정리해봐요', '오늘 배운 것을 떠올려봐요', 'orange');
@@ -1808,51 +1808,90 @@ function renderReflection() {
   const a = state.problems.activity;
   const maxItem = a.items[a.values.indexOf(Math.max(...a.values))];
   const minItem = a.items[a.values.indexOf(Math.min(...a.values))];
-  document.getElementById('scene').innerHTML = `
-    <div style="flex:1; display:flex; flex-direction:column; gap:14px; justify-content:center; padding:0 40px;">
-      <div style="text-align:center;">
-        <div style="font-size:80px; line-height:1;">💭</div>
-        <h2 style="font-size:30px; font-weight:700; color:#7c3aed; margin-top:8px;">우리가 배운 것을 떠올려봐요!</h2>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
-        <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:18px; padding:18px 22px; border:3px solid #f59e0b;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-            <span style="font-size:32px; line-height:1;">📋</span>
-            <h3 style="font-size:21px; font-weight:700; color:#78350f;">표로 정리하면</h3>
-          </div>
-          <p style="font-size:18px; font-weight:700; color:#451a03; line-height:1.5;">
-            정확한 <span style="color:#dc2626;">숫자</span>를 알 수 있어요.<br>
-            합계도 한 번에 보여요!
-          </p>
+  
+  const slides = [
+    {
+      emoji: '📋',
+      title: '표로 정리하면',
+      bg: 'linear-gradient(135deg,#fef3c7,#fde68a)',
+      border: '#f59e0b',
+      titleColor: '#78350f',
+      content: `<p style="font-size:42px; font-weight:700; color:#451a03; line-height:1.7; text-align:center;">
+        정확한 <span style="color:#dc2626;">숫자</span>를 알 수 있어요!<br><br>
+        <span style="color:#dc2626;">합계</span>도 한 번에 보여요!
+      </p>`,
+      speak: '표로 정리하면 정확한 숫자를 알 수 있어요. 합계도 한 번에 보여요!'
+    },
+    {
+      emoji: '📊',
+      title: '그래프로 그리면',
+      bg: 'linear-gradient(135deg,#fce7f3,#fbcfe8)',
+      border: '#ec4899',
+      titleColor: '#831843',
+      content: `<p style="font-size:42px; font-weight:700; color:#500724; line-height:1.7; text-align:center;">
+        누가 <span style="color:#9333ea;">가장 많은지</span><br><br>
+        <span style="color:#9333ea;">한눈에</span> 비교할 수 있어요!
+      </p>`,
+      speak: '그래프로 그리면 누가 가장 많은지 한눈에 비교할 수 있어요!'
+    },
+    {
+      emoji: '🌟',
+      title: '오늘 우리가 배운 것',
+      bg: 'linear-gradient(135deg,#ede9fe,#ddd6fe)',
+      border: '#a78bfa',
+      titleColor: '#4c1d95',
+      content: `
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:18px; padding:0; font-size:28px; font-weight:700; color:#4c1d95; line-height:1.5; text-align:left; max-width:760px; margin:0 auto;">
+          <li>✏️ 자료를 <strong style="color:#dc2626;">표</strong>로 정리했어요</li>
+          <li>🎨 <strong style="color:#ec4899;">○ 그래프</strong>(세로)와 <strong style="color:#10b981;">기호 그래프</strong>(가로)를 그렸어요</li>
+          <li>🔍 가장 많은 동물: ${getEmoji(maxItem)} <strong style="color:#dc2626;">${maxItem} (${Math.max(...a.values)}명)</strong></li>
+          <li>🔍 가장 적은 동물: ${getEmoji(minItem)} <strong style="color:#2563eb;">${minItem} (${Math.min(...a.values)}명)</strong></li>
+        </ul>`,
+      speak: `오늘 우리는 자료를 표로 정리하고 그래프로 그렸어요. 가장 많은 동물은 ${maxItem} ${Math.max(...a.values)}명이고, 가장 적은 동물은 ${minItem} ${Math.min(...a.values)}명이에요.`
+    }
+  ];
+  
+  let idx = 0;
+  
+  function showSlide(i) {
+    const s = slides[i];
+    const isLast = (i === slides.length - 1);
+    document.getElementById('scene').innerHTML = `
+      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 40px; gap:24px;">
+        <div style="background:${s.bg}; border-radius:32px; padding:36px 50px; border:6px solid ${s.border}; max-width:1050px; width:100%; box-shadow:0 12px 32px rgba(0,0,0,0.12); text-align:center;">
+          <div style="font-size:120px; line-height:1; margin-bottom:10px; animation: bounce 2s infinite;">${s.emoji}</div>
+          <h2 style="font-size:48px; font-weight:700; color:${s.titleColor}; margin-bottom:24px; letter-spacing:-0.02em;">${s.title}</h2>
+          ${s.content}
         </div>
-        <div style="background:linear-gradient(135deg,#fce7f3,#fbcfe8); border-radius:18px; padding:18px 22px; border:3px solid #ec4899;">
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
-            <span style="font-size:32px; line-height:1;">📊</span>
-            <h3 style="font-size:21px; font-weight:700; color:#831843;">그래프로 그리면</h3>
-          </div>
-          <p style="font-size:18px; font-weight:700; color:#500724; line-height:1.5;">
-            누가 <span style="color:#9333ea;">가장 많은지</span><br>
-            <span style="color:#9333ea;">한눈에</span> 비교할 수 있어요!
-          </p>
+        
+        <div style="display:flex; gap:10px; align-items:center;">
+          ${slides.map((_, j) => `<div style="width:${j===i?40:14}px; height:14px; border-radius:7px; background:${j===i?'#7c3aed':'#d1d5db'}; transition:all 0.3s;"></div>`).join('')}
+        </div>
+        
+        <div style="display:flex; gap:14px; align-items:center;">
+          ${i > 0 ? '<button class="btn btn-ghost" id="prev-slide">⬅️ 이전</button>' : ''}
+          <button class="btn btn-warn" id="speak-slide" title="다시 듣기" style="padding:14px 22px;">🔊 다시 듣기</button>
+          <button class="btn ${isLast ? 'btn-success' : 'btn-primary'} btn-lg" id="next-slide">
+            ${isLast ? '퀴즈 도전 🎯' : '다음 ➡️'}
+          </button>
         </div>
       </div>
-      <div style="background:#fff; border-radius:18px; padding:18px 24px; border:3px solid #a78bfa;">
-        <h3 style="font-size:21px; font-weight:700; color:#4c1d95; margin-bottom:10px; display:flex; align-items:center; gap:8px;">🌟 오늘 우리는...</h3>
-        <ul style="list-style:none; display:flex; flex-direction:column; gap:8px;">
-          <li style="font-size:18px; font-weight:700; color:#4c1d95; line-height:1.5;">✏️ 자료를 <strong style="color:#dc2626;">표</strong>로 정리했어요</li>
-          <li style="font-size:18px; font-weight:700; color:#4c1d95; line-height:1.5;">🎨 표를 <strong style="color:#ec4899;">○ 그래프</strong>(세로)와 <strong style="color:#10b981;">✕ 그래프</strong>(가로)로 그렸어요</li>
-          <li style="font-size:18px; font-weight:700; color:#4c1d95; line-height:1.5;">🔍 가장 많은 동물은 ${getEmoji(maxItem)} <strong style="color:#dc2626;">${maxItem} (${Math.max(...a.values)}명)</strong>!</li>
-          <li style="font-size:18px; font-weight:700; color:#4c1d95; line-height:1.5;">🔍 가장 적은 동물은 ${getEmoji(minItem)} <strong style="color:#2563eb;">${minItem} (${Math.min(...a.values)}명)</strong>!</li>
-        </ul>
-      </div>
-    </div>
-    <div class="act-footer">
-      <div class="act-status ok">잘 떠올려봤나요? 이제 퀴즈로 확인해봐요!</div>
-      <button class="btn btn-success" id="next-btn">퀴즈 도전 🎯</button>
-    </div>
-  `;
-  document.getElementById('next-btn').addEventListener('click', () => renderQuiz());
-  setTimeout(() => say('잘 떠올려봤나요? 이제 퀴즈로 배운 것을 확인해봐요.'), 400);
+    `;
+    
+    setTimeout(() => say(s.speak), 300);
+    
+    document.getElementById('next-slide').addEventListener('click', () => {
+      tts.stop();
+      if (isLast) renderQuiz();
+      else { idx++; showSlide(idx); }
+    });
+    if (i > 0) {
+      document.getElementById('prev-slide').addEventListener('click', () => { tts.stop(); idx--; showSlide(idx); });
+    }
+    document.getElementById('speak-slide').addEventListener('click', () => sayForce(s.speak));
+  }
+  
+  showSlide(0);
 }
 
 // 퀴즈
@@ -1906,7 +1945,7 @@ function showQuizQuestion() {
 function showQuizFeedback(correct, desc) {
   if (correct) rewardFireworks();
   else playSound('wrong');
-  say(correct ? '정답이에요! ' + desc : '아쉬워요. ' + desc);
+  say(correct ? '정답이에요! ' + desc : '아쉬워요. 다시 한 번 잘 생각해봐요.');
   const overlay = document.createElement('div');
   overlay.className = 'modal-bg';
   if (correct) {
@@ -1923,7 +1962,7 @@ function showQuizFeedback(correct, desc) {
       <div class="modal-box">
         <div class="modal-emoji">😢</div>
         <div class="modal-title" style="color:#ef4444">아쉬워요!</div>
-        <div class="modal-text">${desc}</div>
+        <div class="modal-text">다시 한 번 잘 생각해보고 골라봐요!</div>
         <button class="btn btn-warn" id="modal-retry">🔄 다시 풀기</button>
       </div>
     `;
