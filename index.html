@@ -9,6 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
+  /* ===========================================
+     기본 리셋 + 반응형 스케일 디자인
+     기준 캔버스: 1280x800 (태블릿 가로)
+     모든 기기에서 contain 방식으로 꽉 차게
+  =========================================== */
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { 
     width: 100%; height: 100%; overflow: hidden; 
@@ -16,29 +21,49 @@
     background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #dbeafe 100%);
     position: fixed;
     inset: 0;
+    word-break: keep-all;
+    line-break: strict;
+    overflow-wrap: break-word;
   }
+  /* 한국어 어절 단위 줄바꿈 - 모든 요소에 상속 */
+  * { word-break: keep-all; line-break: strict; }
+  /* 단, 입력 필드는 정상 동작하도록 예외 */
+  input, textarea { word-break: normal; }
   
+  /* 스케일 컨테이너 - JS에서 transform: scale() 적용 */
   #stage-wrap {
-    position: fixed; inset: 0;
-    display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
   }
   
   #stage {
-    width: 1280px; height: 800px;
-    background: #fff; border-radius: 0; overflow: hidden;
-    display: flex; flex-direction: column;
+    width: 1280px;
+    height: 800px;
+    background: #fff;
+    border-radius: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     transform-origin: center center;
-    position: relative; flex-shrink: 0;
+    position: relative;
+    flex-shrink: 0;
   }
   
-  /* 헤더 */
+  /* ---- 헤더 ---- */
   .header {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 14px 28px;
     background: linear-gradient(90deg, #4f46e5, #7c3aed);
-    color: #fff; flex-shrink: 0;
-    transition: background 0.4s; height: 70px;
+    color: #fff;
+    flex-shrink: 0;
+    transition: background 0.4s;
+    height: 70px;
   }
   .header.green { background: linear-gradient(90deg, #059669, #10b981); }
   .header.orange { background: linear-gradient(90deg, #f59e0b, #ef4444); }
@@ -58,26 +83,36 @@
   .icon-btn.off { background: rgba(255,255,255,0.1); opacity: 0.6; }
   .student-tag { background: rgba(255,255,255,0.25); padding: 8px 18px; border-radius: 20px; font-weight: 800; font-size: 18px; }
   
-  /* 진행바 */
+  /* ---- 진행바 ---- */
   .progress { display: flex; gap: 6px; padding: 8px 28px; flex-shrink: 0; height: 22px; align-items: center; background: #fafbfc; }
   .progress .dot { flex: 1; height: 8px; border-radius: 4px; background: #e5e7eb; transition: all 0.4s; }
   .progress .dot.active { background: linear-gradient(90deg, #4f46e5, #7c3aed); }
   .progress .dot.done { background: #10b981; }
   
-  /* 본문 */
-  .body { flex: 1; overflow: hidden; position: relative; background: #fafbfc; min-height: 0; }
+  /* ---- 본문 ---- */
+  .body { 
+    flex: 1; 
+    overflow: hidden; 
+    position: relative; 
+    background: #fafbfc;
+    min-height: 0;
+  }
   .scene { 
-    position: absolute; inset: 0; 
-    padding: 16px 24px; 
-    display: flex; flex-direction: column; 
-    overflow: hidden; gap: 10px;
+    position: absolute; 
+    inset: 0; 
+    padding: 16px 24px 16px 24px; 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden;
+    gap: 10px;
   }
   
-  /* 공통 버튼 */
+  /* ---- 공통 버튼 ---- */
   .btn {
     border: none; cursor: pointer; font-weight: 700; font-family: inherit;
     transition: all 0.15s; border-radius: 16px;
-    padding: 14px 32px; font-size: 22px;
+    padding: 14px 32px;
+    font-size: 22px;
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   }
   .btn:active { transform: translateY(2px) scale(0.98); }
@@ -90,10 +125,11 @@
   .btn-pink { background: linear-gradient(135deg, #ec4899, #f43f5e); color: #fff; box-shadow: 0 6px 0 #be185d, 0 8px 16px rgba(236,72,153,0.3); }
   .btn-pink:active { box-shadow: 0 2px 0 #be185d; }
   .btn-ghost { background: #fff; color: #6b7280; border: 2px solid #e5e7eb; box-shadow: 0 4px 0 #e5e7eb; }
+  .btn-ghost:active { box-shadow: 0 1px 0 #e5e7eb; }
   .btn-lg { padding: 22px 50px; font-size: 28px; border-radius: 20px; }
   .btn-sm { padding: 10px 22px; font-size: 18px; border-radius: 12px; }
   
-  /* 인트로 */
+  /* ---- 인트로 ---- */
   .intro-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; text-align: center; }
   .intro-emoji { font-size: 130px; animation: bounce 2s infinite; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15)); line-height: 1; }
   @keyframes bounce { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-15px) rotate(3deg); } }
@@ -101,29 +137,29 @@
   .intro-card { background: linear-gradient(135deg, #fef3c7, #fce7f3); padding: 30px 50px; border-radius: 28px; max-width: 760px; box-shadow: inset 0 0 0 4px #fff; }
   .intro-card p { font-size: 26px; font-weight: 700; color: #4c1d95; line-height: 1.6; }
   
-  /* 학생 선택 */
+  /* ---- 학생 선택 (드롭다운) ---- */
   .student-select-wrap { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 30px; padding: 30px; }
   .big-character { font-size: 140px; line-height: 1; animation: bounce 2.5s infinite; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.1)); }
   .select-card { background: #fff; border-radius: 28px; padding: 40px 50px; box-shadow: 0 12px 40px rgba(0,0,0,0.12); border: 5px solid #fce7f3; max-width: 600px; width: 100%; text-align: center; }
   .select-label { font-size: 28px; font-weight: 700; color: #831843; margin-bottom: 20px; }
   .student-select { 
-    width: 100%; padding: 24px 28px; font-size: 36px; font-weight: 700;
+    width: 100%; padding: 20px 24px; font-size: 30px; font-weight: 700;
     border: 5px solid #ec4899; border-radius: 20px; background: #fdf2f8;
     color: #831843; font-family: inherit; cursor: pointer;
     text-align: center; text-align-last: center;
-    appearance: none; -webkit-appearance: none;
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ec4899'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat; background-position: right 24px center; background-size: 38px;
-    padding-right: 70px;
+    background-repeat: no-repeat; background-position: right 20px center; background-size: 32px;
+    padding-right: 60px;
   }
   .student-select:focus { outline: none; border-color: #be185d; background-color: #fff; }
-  .student-select option { font-size: 28px; padding: 16px; font-weight: 700; }
+  .student-select option { font-size: 24px; padding: 12px; }
   
-  /* 튜토리얼 박스 */
+  /* ---- 튜토리얼 박스 ---- */
   .tutorial {
     background: linear-gradient(135deg, #fffbeb, #fef3c7);
     border: 4px dashed #f59e0b; border-radius: 18px;
-    padding: 14px 22px;
+    padding: 14px 22px; margin-bottom: 0;
     display: flex; align-items: center; gap: 14px;
     flex-shrink: 0;
   }
@@ -137,15 +173,7 @@
   }
   .tutorial-speaker:hover { transform: scale(1.1); background: #d97706; }
   
-  /* TTS 따라 읽기 하이라이트 */
-  .tts-highlight {
-    background: linear-gradient(180deg, transparent 60%, #fef08a 60%);
-    color: #b45309;
-    padding: 2px 4px; border-radius: 4px;
-    transition: all 0.15s; font-weight: 700;
-  }
-  
-  /* 표 */
+  /* ---- 표 ---- */
   .table-wrap { background: #fff; border-radius: 18px; padding: 16px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 3px solid #e0e7ff; }
   table.data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
   table.data-table th, table.data-table td { padding: 12px 8px; text-align: center; font-size: 22px; }
@@ -163,16 +191,22 @@
   table.data-table input.cell-input.correct { border-color: #10b981; background: #dcfce7; color: #047857; }
   table.data-table input.cell-input.wrong { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.4s; }
   
+  /* 그래프 셀 잘못 그린 동물 표시 (빨간 네모) */
   .graph-vert .col-wrong { box-shadow: inset 0 0 0 4px #ef4444; animation: shake 0.4s; }
   .graph-horiz .row-wrong { box-shadow: inset 0 0 0 4px #ef4444; animation: shake 0.4s; }
   
+  /* 기호 선택 버튼 */
   .symbol-picker { display: flex; gap: 8px; align-items: center; flex-shrink: 0; padding: 8px 14px; background: #fff; border: 3px solid #6ee7b7; border-radius: 14px; }
   .symbol-picker .label { font-size: 17px; font-weight: 700; color: #064e3b; }
   .symbol-btn { width: 44px; height: 44px; border: 3px solid #d1fae5; background: #fff; border-radius: 12px; cursor: pointer; font-size: 24px; transition: all 0.15s; display: flex; align-items: center; justify-content: center; padding: 0; font-family: inherit; }
   .symbol-btn:hover { transform: scale(1.1); }
   .symbol-btn.active { background: #10b981; color: #fff; border-color: #047857; transform: scale(1.15); }
   
-  .classify-preview { background: #fff; border: 3px solid #fcd34d; border-radius: 16px; padding: 12px 18px; flex-shrink: 0; }
+  /* 분류 결과 미리보기 (활동2에서 보여줌) */
+  .classify-preview {
+    background: #fff; border: 3px solid #fcd34d; border-radius: 16px;
+    padding: 12px 18px; flex-shrink: 0;
+  }
   .classify-preview h4 { font-size: 19px; font-weight: 700; color: #92400e; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
   .classify-preview .preview-row { display: flex; gap: 12px; justify-content: space-around; align-items: center; flex-wrap: nowrap; }
   .preview-col { display: flex; flex-direction: row; align-items: center; gap: 10px; padding: 8px 16px; background: #fffbeb; border-radius: 14px; border: 2px solid #fef3c7; }
@@ -180,22 +214,32 @@
   .preview-col .label .em { font-size: 28px; line-height: 1; }
   .preview-col .num { background: #ec4899; color: #fff; padding: 6px 16px; border-radius: 14px; font-size: 22px; font-weight: 700; min-width: 56px; text-align: center; }
   
-  /* 분류 활동 */
+  /* ---- 분류 활동 ---- */
   .classify-wrap { display: flex; gap: 12px; flex: 1; min-height: 0; }
   .classify-source { flex: 0 0 280px; background: #fff; border-radius: 18px; padding: 12px; border: 4px dashed #cbd5e1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
   .classify-source h4 { font-size: 19px; font-weight: 700; color: #475569; text-align: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px dashed #e2e8f0; flex-shrink: 0; }
-  .source-items { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; justify-items: center; align-content: flex-start; flex: 1; overflow: hidden; }
+  .source-items { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 4px; 
+    justify-items: center; 
+    align-content: flex-start; 
+    flex: 1; 
+    overflow: hidden;
+  }
   .source-item {
     font-size: 34px; padding: 2px;
     cursor: grab; user-select: none;
-    transition: all 0.15s; line-height: 1; border-radius: 10px;
+    transition: all 0.15s; line-height: 1;
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
     width: 100%; aspect-ratio: 1;
   }
   .source-item:active { cursor: grabbing; transform: scale(1.2); }
   .source-item.used { opacity: 0.2; pointer-events: none; }
   .source-item.selected { 
-    background: #fde68a; transform: scale(1.2); 
+    background: #fde68a; 
+    transform: scale(1.2); 
     box-shadow: 0 0 0 4px #f59e0b, 0 8px 16px rgba(245,158,11,0.4);
     animation: selectedPulse 1s infinite;
   }
@@ -215,15 +259,20 @@
   @keyframes pop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
   .classify-bin .count { font-size: 22px; font-weight: 700; padding: 6px 16px; border-radius: 14px; background: #f3f4f6; color: #374151; flex-shrink: 0; margin-top: 6px; }
   
-  /* 그래프 (세로) */
-  .graph-vert { background: #fff; border-radius: 18px; padding: 12px; border: 3px solid #fce7f3; flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  /* ---- 그래프 (세로 / 가로) ---- */
+  .graph-vert {
+    background: #fff; border-radius: 18px; padding: 12px;
+    border: 3px solid #fce7f3;
+    flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  }
   .graph-vert .gtitle { text-align: center; background: linear-gradient(90deg, #ec4899, #f43f5e); color: #fff; padding: 8px 22px; border-radius: 14px; font-weight: 700; font-size: 20px; margin: 0 auto 10px; flex-shrink: 0; }
   .graph-vert .grid { flex: 1; display: grid; gap: 0; min-height: 0; }
   .graph-vert .y-label { background: #fce7f3; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #831843; font-size: 22px; border: 1px solid #f9a8d4; }
   .graph-vert .cell {
     background: #fff; border: 1px solid #fbcfe8; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 32px; user-select: none; transition: all 0.1s;
+    font-size: 32px; user-select: none;
+    transition: all 0.1s;
   }
   .graph-vert .cell:hover { background: #fdf2f8; }
   .graph-vert .cell.filled { background: #fef3c7; }
@@ -248,21 +297,28 @@
   .graph-horiz .x-corner::before { content: '동물'; font-size: 14px; position: absolute; top: 4px; left: 4px; color: #064e3b; font-weight: 700; }
   .graph-horiz .x-corner::after { content: '학생수(명)'; font-size: 13px; position: absolute; bottom: 4px; right: 4px; color: #064e3b; font-weight: 700; }
   
-  .ref-table { background: #fff; border: 3px solid #c7d2fe; border-radius: 14px; padding: 8px 14px; flex-shrink: 0; display: flex; align-items: center; gap: 14px; }
+  /* 표 참고 박스 (그래프 화면) */
+  .ref-table {
+    background: #fff; border: 3px solid #c7d2fe; border-radius: 14px;
+    padding: 8px 14px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 14px;
+  }
   .ref-table .ref-label { background: #4f46e5; color: #fff; padding: 6px 14px; border-radius: 12px; font-size: 17px; font-weight: 700; flex-shrink: 0; }
   .ref-table .ref-items { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; justify-content: center; }
   .ref-item { display: flex; align-items: center; gap: 6px; padding: 4px 12px; background: #eef2ff; border-radius: 10px; border: 2px solid #c7d2fe; font-size: 18px; font-weight: 700; color: #3730a3; }
   .ref-item .em { font-size: 26px; line-height: 1; }
   .ref-item .n { color: #ec4899; font-size: 22px; font-weight: 700; }
   
-  /* 활동 푸터 */
+  /* ---- 활동 푸터 ---- */
   .act-footer { display: flex; align-items: center; gap: 12px; padding-top: 6px; flex-shrink: 0; }
   .act-status { flex: 1; background: #fff; padding: 14px 22px; border-radius: 14px; font-weight: 700; font-size: 20px; border: 3px solid #e5e7eb; color: #6b7280; display: flex; align-items: center; gap: 10px; min-height: 60px; }
   .act-status.ok { background: linear-gradient(90deg, #dcfce7, #bbf7d0); border-color: #86efac; color: #14532d; }
   .act-status.bad { background: linear-gradient(90deg, #fee2e2, #fecaca); border-color: #fca5a5; color: #7f1d1d; }
   .act-status.hint { background: linear-gradient(90deg, #fef3c7, #fde68a); border-color: #f59e0b; color: #78350f; }
+  .btn { padding: 14px 28px; font-size: 21px; }
+  .btn-lg { padding: 18px 42px; font-size: 24px; }
   
-  /* 녹음 화면 */
+  /* ---- 녹음 화면 ---- */
   .record-wrap { display: flex; flex-direction: column; gap: 10px; flex: 1; min-height: 0; overflow: hidden; }
   .record-question { background: linear-gradient(135deg, #ede9fe, #ddd6fe); padding: 14px 70px; border-radius: 18px; border: 4px solid #a78bfa; text-align: center; flex-shrink: 0; position: relative; }
   .record-question h3 { font-size: 26px; font-weight: 700; color: #4c1d95; line-height: 1.3; }
@@ -292,12 +348,12 @@
   
   .record-text-box { background: #fff; border: 3px solid #e0e7ff; border-radius: 14px; padding: 12px 16px; min-height: 60px; max-height: 80px; font-size: 20px; font-weight: 600; color: #1f2937; line-height: 1.5; flex: 0 1 auto; overflow-y: auto; font-family: inherit; resize: none; width: 100%; }
   .record-text-box:focus { outline: none; border-color: #6366f1; background: #fafbff; }
-  .record-text-box.empty { color: #9ca3af; font-weight: 600; font-style: italic; }
+  .record-text-box::placeholder { color: #9ca3af; font-weight: 600; font-style: italic; }
   
   .sample-toggle { background: #fef3c7; border: 3px dashed #f59e0b; padding: 10px 22px; border-radius: 14px; cursor: pointer; font-weight: 700; font-size: 19px; color: #92400e; font-family: inherit; }
   .sample-content { background: #fefce8; border-left: 5px solid #f59e0b; padding: 12px 16px; border-radius: 10px; font-size: 20px; color: #713f12; line-height: 1.5; font-weight: 600; margin-top: 4px; }
   
-  /* 퀴즈 */
+  /* ---- 퀴즈 ---- */
   .quiz-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; padding: 0 60px; }
   .quiz-q { background: linear-gradient(135deg, #ddd6fe, #c4b5fd); padding: 30px 36px; border-radius: 26px; width: 100%; max-width: 820px; text-align: center; border: 5px solid #a78bfa; position: relative; }
   .quiz-q .speak-btn { position: absolute; right: 18px; top: 18px; background: #6d28d9; color: #fff; border: none; border-radius: 50%; width: 48px; height: 48px; cursor: pointer; font-size: 22px; box-shadow: 0 3px 0 #4c1d95; }
@@ -306,7 +362,8 @@
   .quiz-options { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 820px; }
   .quiz-opt {
     background: #fff; border: 5px solid #e9d5ff; border-radius: 20px;
-    padding: 22px 30px; font-size: 24px; font-weight: 700; color: #4c1d95;
+    padding: 22px 30px;
+    font-size: 24px; font-weight: 700; color: #4c1d95;
     cursor: pointer; display: flex; align-items: center; gap: 16px; text-align: left;
     transition: all 0.2s; box-shadow: 0 4px 0 #ddd6fe;
     font-family: inherit;
@@ -315,18 +372,19 @@
   .quiz-opt:active { transform: translateY(0); box-shadow: 0 1px 0 #ddd6fe; }
   .quiz-opt .num { width: 48px; height: 48px; background: #ede9fe; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #6d28d9; flex-shrink: 0; font-size: 24px; }
   
-  /* 자기평가 별 */
+  /* ---- 자기평가 별 ---- */
   .stars-row { display: flex; gap: 12px; justify-content: center; }
   .star-btn { background: none; border: none; cursor: pointer; font-size: 70px; transition: all 0.15s; padding: 4px; filter: grayscale(1) opacity(0.4); line-height: 1; }
   .star-btn.lit { filter: none; transform: scale(1.1); animation: starpop 0.3s; }
   @keyframes starpop { 0% { transform: scale(0.5); } 60% { transform: scale(1.3); } 100% { transform: scale(1.1); } }
   
-  /* 결과/수료증 */
+  /* ---- 결과/수료증 ---- */
   .cert-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
   .cert {
     background: linear-gradient(135deg, #fffbeb, #fef3c7);
     border: 8px double #f59e0b;
-    padding: 30px 50px; border-radius: 24px;
+    padding: 30px 50px;
+    border-radius: 24px;
     max-width: 700px; width: 90%; text-align: center;
     box-shadow: 0 12px 32px rgba(245,158,11,0.25);
     position: relative;
@@ -337,7 +395,7 @@
   .cert .text { font-size: 21px; font-weight: 700; color: #451a03; line-height: 1.7; margin-top: 14px; }
   .cert .date { font-size: 16px; font-weight: 700; color: #92400e; margin-top: 16px; letter-spacing: 0.15em; }
   
-  /* 학습 전후 비교 */
+  /* ---- 학습 전후 비교 ---- */
   .compare-wrap { flex: 1; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; padding: 4px; min-height: 0; }
   .compare-card { background: #fff; border-radius: 16px; padding: 16px 20px; border: 4px solid; flex-shrink: 0; }
   .compare-card.before { border-color: #fca5a5; background: #fef2f2; }
@@ -347,7 +405,7 @@
   .compare-card.after .compare-label { background: #10b981; color: #fff; }
   .compare-text { font-size: 20px; font-weight: 600; color: #1f2937; line-height: 1.6; }
   
-  /* 모달 */
+  /* ---- 모달 ---- */
   .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
   .modal-box { background: #fff; border-radius: 26px; padding: 36px; max-width: 540px; width: 100%; text-align: center; }
   .modal-emoji { font-size: 90px; margin-bottom: 14px; animation: bounce 1.2s infinite; line-height: 1; }
@@ -355,56 +413,34 @@
   .modal-text { font-size: 21px; font-weight: 700; line-height: 1.6; color: #4b5563; margin-bottom: 18px; }
   .modal-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   
-  /* 보상 애니메이션 */
-  .reward-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
-  .reward-piece {
-    position: absolute; font-size: 48px; line-height: 1;
-    animation: rewardFly 1.8s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
-    user-select: none;
-  }
-  @keyframes rewardFly {
-    0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 0; }
-    15% { transform: translate(0, -40px) scale(1.2) rotate(60deg); opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(0.6) rotate(720deg); opacity: 0; }
-  }
+  /* ---- 마이크 권한 모달 ---- */
+  .perm-modal { background: #fff; border-radius: 26px; padding: 40px; max-width: 580px; width: 100%; text-align: center; }
+  .perm-emoji { font-size: 100px; margin-bottom: 16px; line-height: 1; }
+  .perm-title { font-size: 32px; font-weight: 700; color: #1d4ed8; margin-bottom: 14px; }
+  .perm-text { font-size: 21px; font-weight: 700; line-height: 1.6; color: #4b5563; margin-bottom: 22px; }
   
-  .praise-stamp {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    z-index: 250; pointer-events: none;
-    background: #fff; padding: 24px 40px; border-radius: 32px;
-    border: 6px solid #fbbf24;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
-    animation: stampPop 1.6s ease-out forwards;
-    text-align: center;
-  }
-  .praise-stamp .praise-emoji { font-size: 80px; line-height: 1; margin-bottom: 8px; }
-  .praise-stamp .praise-text { font-size: 32px; font-weight: 700; color: #b45309; line-height: 1; }
-  @keyframes stampPop {
-    0% { transform: translate(-50%, -50%) scale(0) rotate(-30deg); opacity: 0; }
-    30% { transform: translate(-50%, -50%) scale(1.3) rotate(8deg); opacity: 1; }
-    50% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-    80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-    100% { transform: translate(-50%, -50%) scale(1.2) rotate(0deg); opacity: 0; }
-  }
-  
+  /* ---- 로딩 ---- */
   .loader { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 20px; font-size: 22px; font-weight: 700; color: #6366f1; }
   .spin { width: 40px; height: 40px; border: 5px solid #e0e7ff; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   
+  /* ---- 히든 ---- */
   .hidden { display: none !important; }
   
+  /* 스크롤바 예쁘게 */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
   
+  /* 흔들림 효과 */
   @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 </style>
 </head>
 <body>
 <div id="stage-wrap">
   <div id="stage">
+    <!-- 헤더 -->
     <header class="header" id="hdr">
       <div>
         <h1 id="hdr-title"><span>🎨</span><span>그림그래프 마법사</span></h1>
@@ -416,7 +452,11 @@
         <button class="icon-btn hidden" id="home-btn" title="처음으로">🏠</button>
       </div>
     </header>
+    
+    <!-- 진행바 -->
     <div class="progress hidden" id="progress"></div>
+    
+    <!-- 본문 -->
     <main class="body">
       <div class="scene" id="scene"></div>
     </main>
@@ -424,26 +464,37 @@
 </div>
 
 <script>
+// ========================
 // ★ Apps Script 웹앱 URL
+// ========================
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxsVP5Dm5tdoxdyLlRI4Hbx03di58bHmwSP_RI6nxYFq5FuiZNJBOCgNJG-kn0lZyjC/exec';
 
-// 반응형 스케일
+// ========================
+// 반응형 스케일 - 모든 기기에서 1280x800 캔버스를 contain 방식으로 꽉 채움
+// ========================
 function fitStage() {
   const stage = document.getElementById('stage');
-  const baseW = 1280, baseH = 800;
-  const winW = window.innerWidth, winH = window.innerHeight;
+  const baseW = 1280;
+  const baseH = 800;
+  const winW = window.innerWidth;
+  const winH = window.innerHeight;
+  
+  // 가로/세로 중 작은 비율로 contain → 잘리지 않음
   const scale = Math.min(winW / baseW, winH / baseH);
   stage.style.transform = `scale(${scale})`;
 }
 window.addEventListener('resize', fitStage);
 window.addEventListener('orientationchange', () => setTimeout(fitStage, 100));
 
+// ========================
 // API 호출
+// ========================
 async function callAPI(action, payload = {}) {
   if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('YOUR_APPS_SCRIPT')) return null;
   try {
     const res = await fetch(APPS_SCRIPT_URL, {
-      method: 'POST', mode: 'cors',
+      method: 'POST',
+      mode: 'cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action, ...payload }),
       redirect: 'follow'
@@ -456,22 +507,35 @@ async function callAPI(action, payload = {}) {
   }
 }
 
-// TTS
+// ========================
+// TTS - 한국어 여성 음성 (유치원 선생님 톤)
+// ========================
 const tts = {
-  voices: [], bestVoice: null, ready: false,
+  voices: [],
+  bestVoice: null,
+  ready: false,
+  
   init() {
     if (!window.speechSynthesis) return;
+    
     const loadVoices = () => {
       this.voices = window.speechSynthesis.getVoices();
       if (this.voices.length === 0) return;
+      
       const koVoices = this.voices.filter(v => v.lang === 'ko-KR' || v.lang.startsWith('ko'));
-      const googleKo = koVoices.find(v => v.name.toLowerCase().includes('google') && !v.localService);
-      const wavenet = koVoices.find(v => /wavenet|neural|premium|enhanced|natural/i.test(v.name));
-      const microsoftFemale = koVoices.find(v => v.name.includes('Heami') || v.name.includes('SunHi') || v.name.includes('Yuna'));
-      const female = koVoices.find(v => v.name.toLowerCase().includes('female'));
-      this.bestVoice = googleKo || wavenet || microsoftFemale || female || koVoices[0];
+      
+      this.bestVoice = 
+        koVoices.find(v => v.name.includes('Google') && v.name.includes('한국')) ||
+        koVoices.find(v => v.name.includes('Google') && v.lang === 'ko-KR') ||
+        koVoices.find(v => v.name.includes('Heami')) ||
+        koVoices.find(v => v.name.includes('SunHi')) ||
+        koVoices.find(v => v.name.includes('Yuna')) ||
+        koVoices.find(v => v.name.toLowerCase().includes('female')) ||
+        koVoices[0];
+      
       this.ready = true;
     };
+    
     loadVoices();
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -479,29 +543,36 @@ const tts = {
     setTimeout(loadVoices, 500);
     setTimeout(loadVoices, 1500);
   },
+  
   speak(text, opts = {}) {
-    if (!opts.force && !state.speaker) return;
-    if (!window.speechSynthesis || !text) return;
+    if (!state.speaker || !window.speechSynthesis || !text) return;
     window.speechSynthesis.cancel();
+    
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ko-KR';
     if (this.bestVoice) u.voice = this.bestVoice;
     u.rate = opts.rate || 0.95;
-    u.pitch = opts.pitch || 1.0;
+    u.pitch = opts.pitch || 1.15;
     u.volume = opts.volume || 1.0;
+    
     window.speechSynthesis.speak(u);
   },
-  stop() { if (window.speechSynthesis) window.speechSynthesis.cancel(); }
+  
+  stop() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+  }
 };
 
 function say(text, opts) { tts.speak(text, opts); }
-function sayForce(text, opts) { tts.speak(text, { ...opts, force: true }); }
 
-// 효과음 (★ if (type==='correct') 복구)
+// ========================
+// 효과음
+// ========================
 function playSound(type) {
   if (!state.speaker) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    
     if (type === 'correct') {
       [523.25, 659.25, 783.99].forEach((f, i) => {
         const o = ctx.createOscillator();
@@ -559,68 +630,34 @@ function playSound(type) {
   } catch (e) {}
 }
 
-// 보상 애니메이션
-function showReward(opts = {}) {
-  const body = document.querySelector('.body');
-  if (!body) return;
-  const symbols = opts.symbols || ['⭐', '✨', '🎉', '💖', '🌟', '🎊', '💫', '🎈'];
-  const overlay = document.createElement('div');
-  overlay.className = 'reward-overlay';
-  const pieces = opts.count || 30;
-  for (let i = 0; i < pieces; i++) {
-    const piece = document.createElement('span');
-    piece.className = 'reward-piece';
-    piece.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    const startX = 30 + Math.random() * 40;
-    const startY = 30 + Math.random() * 40;
-    piece.style.left = startX + '%';
-    piece.style.top = startY + '%';
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 200 + Math.random() * 400;
-    piece.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
-    piece.style.setProperty('--ty', Math.sin(angle) * distance + 200 + 'px');
-    piece.style.fontSize = (32 + Math.random() * 32) + 'px';
-    piece.style.animationDelay = (Math.random() * 0.3) + 's';
-    overlay.appendChild(piece);
-  }
-  body.appendChild(overlay);
-  setTimeout(() => overlay.remove(), 2500);
-  
-  if (opts.stamp) {
-    const stamp = document.createElement('div');
-    stamp.className = 'praise-stamp';
-    stamp.innerHTML = `
-      <div class="praise-emoji">${opts.stampEmoji || '🏅'}</div>
-      <div class="praise-text">${opts.stampText || '잘했어요!'}</div>
-    `;
-    body.appendChild(stamp);
-    setTimeout(() => stamp.remove(), 1700);
-  }
-}
-
-function rewardSmall() { showReward({ count: 20, symbols: ['⭐', '✨', '💫'] }); playSound('correct'); }
-function rewardBig(text = '잘했어요!', emoji = '🏅') {
-  showReward({ count: 40, symbols: ['⭐', '✨', '🎉', '💖', '🌟', '🎊', '💫', '🎈'], stamp: true, stampText: text, stampEmoji: emoji });
-  playSound('cheer');
-}
-function rewardFireworks() {
-  showReward({ count: 50, symbols: ['🎆', '🎇', '✨', '🌟', '⭐', '💥', '🎉', '🎊'], stamp: true, stampText: '완벽해요!', stampEmoji: '🎉' });
-  playSound('cheer');
-}
-
-// 상태
+// ========================
+// 전역 상태
+// ========================
 const state = {
-  phase: 'loading', speaker: false,
-  micPermission: null, micStream: null,
-  student: null, students: [], problems: null,
+  phase: 'loading',
+  speaker: false,
+  micPermission: null,
+  micStream: null,
+  student: null,
+  students: [],
+  problems: null,
   startTime: Date.now(),
+  
   done: { pre:false, act1:false, act2:false, act3:false, act4:false, act5:false, quiz:false, post:false },
-  classifyData: {}, tableData: {}, vertGraph: {}, horizGraph: {},
-  quizIdx: 0, quizAnswers: [],
+  
+  classifyData: {},
+  tableData: {},
+  vertGraph: {},
+  horizGraph: {},
+  
+  quizIdx: 0,
+  quizAnswers: [],
+  
   preText: '', preAudio: '', preUrl: '',
   postText: '', postAudio: '', postUrl: '',
-  selfStars: 0, retried: false,
-  helpUsed: 0
+  
+  selfStars: 0,
+  retried: false,
 };
 
 const PHASES = [
@@ -637,6 +674,9 @@ const PHASES = [
   { key: 'cert', label: '수료' },
 ];
 
+// ========================
+// 헤더 / 진행바
+// ========================
 function updateHeader(emoji, title, sub, color) {
   document.getElementById('hdr-title').innerHTML = `<span>${emoji}</span><span>${title}</span>`;
   document.getElementById('hdr-sub').textContent = sub || '';
@@ -663,10 +703,15 @@ function updateStudentTag() {
   if (state.student) {
     tag.classList.remove('hidden');
     tag.textContent = `👤 ${state.student.name}`;
-  } else { tag.classList.add('hidden'); }
+  } else {
+    tag.classList.add('hidden');
+  }
   document.getElementById('home-btn').classList.toggle('hidden', !state.student || state.phase === 'cert');
 }
 
+// ========================
+// 이모지 매핑
+// ========================
 const ITEM_EMOJI = {
   '개': '🐶', '앵무새': '🦜', '고양이': '🐱', '토끼': '🐰', '금붕어': '🐠',
   '사과': '🍎', '바나나': '🍌', '딸기': '🍓', '포도': '🍇', '수박': '🍉',
@@ -675,13 +720,20 @@ const ITEM_EMOJI = {
 };
 function getEmoji(item) { return ITEM_EMOJI[item] || '⭐'; }
 
+// ========================
+// 초기 로딩 + 마이크 권한
+// ========================
 async function init() {
   fitStage();
   tts.init();
+  
   document.getElementById('speaker-btn').addEventListener('click', toggleSpeaker);
   document.getElementById('home-btn').addEventListener('click', goHome);
+  
   renderLoading();
+  
   await requestMicPermission();
+  
   const data = await callAPI('getInitData');
   if (data && !data.error) {
     state.problems = data.problems;
@@ -689,11 +741,13 @@ async function init() {
   } else {
     setDefaultData();
   }
+  
   renderIntro();
 }
 
 async function requestMicPermission() {
   if (state.micPermission !== null) return;
+  
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     state.micPermission = true;
@@ -702,7 +756,7 @@ async function requestMicPermission() {
   } catch (err) {
     if (err.name === 'NotAllowedError') {
       state.micPermission = false;
-      say('마이크 권한이 거부되었어요. 나중에 설정에서 허용해주세요.');
+      say('마이크 권한이 거부되었어요. 키보드로 직접 입력할 수 있어요.');
     } else {
       state.micPermission = null;
     }
@@ -713,15 +767,23 @@ function setDefaultData() {
   const fruitTable = {
     title: '우리 반 학생들이 좋아하는 과일별 학생 수',
     items: ['사과','바나나','딸기','포도','수박'],
-    values: [7,5,8,3,2], unit: '명'
+    values: [7,5,8,3,2],
+    unit: '명'
   };
   state.problems = {
-    pre: { question: '표를 보고 알 수 있는 것을 자유롭게 말해보세요.', ...fruitTable,
-           sample: '예: "딸기를 좋아하는 학생이 8명으로 가장 많아요. 수박은 2명으로 가장 적어요. 우리 반은 모두 25명이에요."' },
+    pre: { 
+      question: '표를 보고 알 수 있는 것을 자유롭게 말해보세요.', 
+      ...fruitTable,
+      sample: '예: "딸기를 좋아하는 학생이 8명으로 가장 많아요. 수박은 2명으로 가장 적어요. 우리 반은 모두 25명이에요."' 
+    },
     activity: { title: '수찬이네 반 학생들이 좋아하는 동물별 학생 수',
                 items: ['개','앵무새','고양이','토끼','금붕어'], values: [6,3,5,2,4], unit: '명' },
-    post: { question: '학습 전에 봤던 표예요! 이번에는 그래프로도 표현되어 있어요. 알 수 있는 것을 다시 말해보세요!', ...fruitTable,
-            sample: '예: "딸기가 8명으로 가장 많고, 수박이 2명으로 가장 적어요. 표보다 그래프가 한눈에 비교하기 쉬워요!"', showGraph: true },
+    post: { 
+      question: '학습 전에 봤던 표예요! 이번에는 그래프로도 표현되어 있어요. 알 수 있는 것을 다시 말해보세요!', 
+      ...fruitTable,
+      sample: '예: "딸기가 8명으로 가장 많고, 수박이 2명으로 가장 적어요. 표보다 그래프가 한눈에 비교하기 쉬워요!"',
+      showGraph: true
+    },
     quizzes: [
       { q: '그래프에서 가장 많은 항목을 한눈에 알 수 있는 곳은?', options: ['○가 가장 높이 쌓인 곳', '○가 가장 적은 곳'], ans: 1, desc: '맞아요! ○가 가장 높이 쌓인 곳이 가장 많은 항목이에요.' },
       { q: '표와 그래프 중 한눈에 비교하기 더 좋은 것은?', options: ['숫자가 적힌 표', '그림이 그려진 그래프'], ans: 2, desc: '딩동댕! 그래프는 그림의 높이만 봐도 누가 가장 많은지 한눈에 알 수 있어요.' },
@@ -757,23 +819,27 @@ function goHome() {
     state.vertGraph = {}; state.horizGraph = {};
     state.quizIdx = 0; state.quizAnswers = [];
     state.preText = ''; state.postText = ''; state.selfStars = 0;
-    state.helpUsed = 0;
     state.startTime = Date.now();
     renderIntro();
   }
 }
 
+// ========================
+// 헬퍼: 튜토리얼 박스 (스피커 버튼 자동 포함)
+// ========================
 function tutorialHTML(text) {
-  const cleanText = text.replace(/`/g,'').replace(/<[^>]+>/g,'').replace(/'/g, "\\'").replace(/"/g, '&quot;');
   return `
     <div class="tutorial">
       <div class="lamp">💡</div>
       <div class="text">${text}</div>
-      <button class="tutorial-speaker" onclick="sayWithHighlight('${cleanText}', this.previousElementSibling, {force:true})" title="다시 듣기">🔊</button>
+      <button class="tutorial-speaker" onclick="say(\`${text.replace(/`/g,'').replace(/<[^>]+>/g,'')}\`)" title="다시 듣기">🔊</button>
     </div>
   `;
 }
 
+// ========================
+// 화면: 로딩
+// ========================
 function renderLoading() {
   state.phase = 'loading';
   updateHeader('🎨', '그림그래프 마법사', '준비하는 중이에요...', '');
@@ -786,11 +852,15 @@ function renderLoading() {
   `;
 }
 
+// ========================
+// 화면: 인트로
+// ========================
 function renderIntro() {
   state.phase = 'intro';
   updateHeader('🎨', '그림그래프 마법사', '자료를 분류하고 그래프로 나타내요', '');
   updateStudentTag();
   updateProgress();
+  
   document.getElementById('scene').innerHTML = `
     <div class="intro-center">
       <div class="intro-emoji">🎨</div>
@@ -802,7 +872,9 @@ function renderIntro() {
           🔊 글자를 읽기 어렵다면 오른쪽 위 스피커 버튼을 눌러주세요!
         </p>
       </div>
-      <button class="btn btn-primary btn-lg" id="start-btn"><span>🚀</span> 시작하기</button>
+      <button class="btn btn-primary btn-lg" id="start-btn">
+        <span>🚀</span> 시작하기
+      </button>
     </div>
   `;
   document.getElementById('start-btn').addEventListener('click', () => {
@@ -812,13 +884,18 @@ function renderIntro() {
   say('안녕하세요! 그림그래프 마법사예요. 오늘 선생님과 함께 그래프를 만들어 봐요. 시작하기 버튼을 눌러주세요.');
 }
 
+// ========================
+// 화면: 학생 선택 (드롭다운)
+// ========================
 function renderStudentSelect() {
   state.phase = 'student';
   updateHeader('👋', '친구를 골라봐요', '아래에서 이름을 선택해주세요', 'pink');
   updateStudentTag();
   updateProgress();
+  
   const avatars = ['🦊','🐻','🐼','🐯','🦁','🐸','🐵','🐨','🐰','🐹','🦄','🐙','🐳','🦋','🌟'];
   const charIdx = Math.floor(Math.random() * avatars.length);
+  
   document.getElementById('scene').innerHTML = `
     <div class="student-select-wrap">
       <div class="big-character">${avatars[charIdx]}</div>
@@ -831,7 +908,9 @@ function renderStudentSelect() {
       </div>
     </div>
   `;
-  document.getElementById('student-select').addEventListener('change', (e) => {
+  
+  const selectEl = document.getElementById('student-select');
+  selectEl.addEventListener('change', (e) => {
     if (!e.target.value) return;
     const [num, name] = e.target.value.split('|');
     state.student = { num, name };
@@ -839,18 +918,25 @@ function renderStudentSelect() {
     say(`${name} 친구, 안녕하세요! 함께 시작해 봐요.`);
     setTimeout(() => renderPreRecord(), 800);
   });
+  
   say('자기 이름을 선택해주세요!');
 }
 
+// ========================
+// 화면: 사전 녹음
+// ★ 변경: 맨 위 튜토리얼 박스 제거 (질문 박스만 남김)
+// ★ 변경: textarea로 키보드 직접 입력 가능하게
+// ★ 변경: 마이크 아래에만 활동 방법 안내
+// ========================
 function renderPreRecord() {
   state.phase = 'pre';
   updateHeader('🎤', '시작 말하기', '표를 보고 자유롭게 말해보세요', 'orange');
   updateStudentTag();
   updateProgress();
+  
   const p = state.problems.pre;
-  const tutorialText = '아래 표를 보고 알 수 있는 것을 마이크 버튼을 눌러 말해보세요. 학습 후에 다시 한 번 말해 볼 거예요!';
+  
   document.getElementById('scene').innerHTML = `
-    ${tutorialHTML(tutorialText)}
     <div class="record-wrap">
       <div class="record-question">
         <h3>${p.question}</h3>
@@ -873,33 +959,66 @@ function renderPreRecord() {
       </div>
       <div class="record-control">
         <button class="mic-btn" id="mic-btn">🎤</button>
-        <div class="mic-status" id="mic-status">마이크 버튼을 눌러 시작해요</div>
+        <div class="mic-status" id="mic-status">🎤 마이크를 누르거나 ⌨️ 아래 칸에 직접 적어보세요</div>
       </div>
-      <div class="record-text-box empty" id="rec-text">여기에 말한 내용이 적혀요</div>
+      <textarea class="record-text-box" id="rec-text" placeholder="여기에 직접 적거나, 마이크로 말한 내용이 적혀요"></textarea>
       <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:space-between;">
         <button class="sample-toggle" id="sample-btn">💡 예시 답안 듣기</button>
-        <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">말하기 끝! 다음으로 ➡️</button>
+        <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">
+          말하기 끝! 다음으로 ➡️
+        </button>
       </div>
       <div id="sample-area"></div>
     </div>
   `;
+  
   setupRecording('pre');
+  
   document.getElementById('sample-btn').addEventListener('click', () => {
-    showSampleModal(p.sample || '예시 답안이 없어요.');
+    const area = document.getElementById('sample-area');
+    if (area.innerHTML) {
+      area.innerHTML = '';
+    } else {
+      area.innerHTML = `<div class="sample-content">${p.sample || '예시 답안이 없어요.'}</div>`;
+      say(p.sample || '예시 답안이 없어요.');
+    }
   });
+  
   document.getElementById('next-btn').addEventListener('click', () => {
     state.done.pre = true;
     saveRecordingToServer('사전');
     renderActivity1();
   });
-  setTimeout(() => say(`${p.question} 표를 보고 알 수 있는 것을 자유롭게 말해보세요. 빨간 마이크 버튼을 눌러주세요.`), 400);
+  
+  setTimeout(() => {
+    say(`${p.question}`);
+  }, 400);
 }
 
+// ========================
+// 녹음 셋업 (textarea + 키보드 입력 지원)
+// ========================
 function setupRecording(type) {
   const micBtn = document.getElementById('mic-btn');
   const status = document.getElementById('mic-status');
   const textBox = document.getElementById('rec-text');
   const nextBtn = document.getElementById('next-btn');
+  
+  // 키보드로 직접 입력해도 다음 버튼 활성화
+  textBox.addEventListener('input', () => {
+    const v = textBox.value.trim();
+    if (type === 'pre') state.preText = v;
+    else state.postText = v;
+    
+    if (v.length > 0) {
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = '1';
+    } else {
+      nextBtn.disabled = true;
+      nextBtn.style.opacity = '0.5';
+    }
+  });
+  
   let recognition = null;
   let isRecording = false;
   let mediaRecorder = null;
@@ -911,6 +1030,7 @@ function setupRecording(type) {
     recognition.lang = 'ko-KR';
     recognition.continuous = true;
     recognition.interimResults = true;
+    
     let finalText = '';
     recognition.onresult = (e) => {
       let interim = '';
@@ -920,36 +1040,23 @@ function setupRecording(type) {
       }
       const display = finalText + interim;
       if (display.trim()) {
-        textBox.classList.remove('empty');
-        if (textBox.tagName === 'TEXTAREA') textBox.value = display;
-        else textBox.textContent = display;
+        textBox.value = display;
       }
       if (type === 'pre') state.preText = finalText.trim();
       else state.postText = finalText.trim();
     };
+    
     recognition.onerror = (e) => {
       if (e.error === 'not-allowed') {
-        status.textContent = '⚠️ 마이크 권한을 허용해주세요';
+        status.textContent = '⚠️ 마이크 권한 없음 - 아래 칸에 키보드로 직접 입력해주세요';
         isRecording = false;
         micBtn.classList.remove('recording');
       }
     };
+    
     recognition.onend = () => {
       if (isRecording) { try { recognition.start(); } catch(e) {} }
     };
-  }
-  
-  // textarea의 직접 입력 처리
-  if (textBox && textBox.tagName === 'TEXTAREA') {
-    textBox.addEventListener('input', () => {
-      const v = textBox.value.trim();
-      if (type === 'pre') state.preText = v;
-      else state.postText = v;
-      if (v.length > 0) {
-        nextBtn.disabled = false;
-        nextBtn.style.opacity = '1';
-      }
-    });
   }
   
   micBtn.addEventListener('click', async () => {
@@ -967,7 +1074,7 @@ function setupRecording(type) {
             const base64 = reader.result.split(',')[1];
             if (type === 'pre') state.preAudio = base64;
             else state.postAudio = base64;
-            const text = (type === 'pre' ? state.preText : state.postText) || (textBox.value || textBox.textContent);
+            const text = (type === 'pre' ? state.preText : state.postText) || textBox.value;
             if (text && text.trim().length > 0) {
               nextBtn.disabled = false;
               nextBtn.style.opacity = '1';
@@ -983,11 +1090,9 @@ function setupRecording(type) {
         micBtn.textContent = '⏹️';
         status.textContent = '🔴 녹음 중... 말해주세요!';
         status.classList.add('live');
-        textBox.classList.remove('empty');
-        if (textBox.tagName === 'TEXTAREA') textBox.value = '';
-        else textBox.textContent = '';
+        textBox.value = '';
       } catch (err) {
-        status.textContent = '⚠️ 마이크를 사용할 수 없어요. 권한을 확인해주세요.';
+        status.textContent = '⚠️ 마이크를 사용할 수 없어요. 아래 칸에 키보드로 입력해주세요.';
       }
     } else {
       isRecording = false;
@@ -995,9 +1100,9 @@ function setupRecording(type) {
       if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
       micBtn.classList.remove('recording');
       micBtn.textContent = '🎤';
-      status.textContent = '✅ 녹음 끝! 다시 누르면 다시 녹음해요';
+      status.textContent = '✅ 녹음 끝! 다시 누르면 다시 녹음해요 (또는 아래에 직접 수정 가능)';
       status.classList.remove('live');
-      const text = (type === 'pre' ? state.preText : state.postText) || (textBox.value || textBox.textContent);
+      const text = (type === 'pre' ? state.preText : state.postText) || textBox.value;
       if (text && text.trim().length > 0) {
         nextBtn.disabled = false;
         nextBtn.style.opacity = '1';
@@ -1023,6 +1128,7 @@ function saveRecordingToServer(typeKor) {
   });
 }
 
+// 예시 답안 모달
 function showSampleModal(sampleText) {
   const overlay = document.createElement('div');
   overlay.className = 'modal-bg';
@@ -1038,56 +1144,22 @@ function showSampleModal(sampleText) {
     </div>
   `;
   document.querySelector('.body').appendChild(overlay);
-  sayForce(sampleText);
-  document.getElementById('sample-listen').addEventListener('click', () => sayForce(sampleText));
-  document.getElementById('sample-close').addEventListener('click', () => { tts.stop(); overlay.remove(); });
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) { tts.stop(); overlay.remove(); } });
+  say(sampleText);
+  document.getElementById('sample-listen').addEventListener('click', () => say(sampleText));
+  document.getElementById('sample-close').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 }
 
-function showHelpModal(opts) {
-  const examples = opts.examples || [];
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-bg';
-  overlay.innerHTML = `
-    <div class="modal-box" style="max-width:680px;">
-      <div class="modal-emoji">💁</div>
-      <div class="modal-title" style="color:#3b82f6;">도움이 필요해요!</div>
-      <p style="font-size:17px; font-weight:700; color:#475569; margin-bottom:14px;">
-        이렇게 말해볼 수 있어요. 듣고 따라해보거나 참고해보세요!
-      </p>
-      <div style="display:flex; flex-direction:column; gap:10px; max-height:320px; overflow-y:auto; margin-bottom:18px;">
-        ${examples.map((ex, i) => `
-          <div style="background:#eff6ff; border-left:5px solid #3b82f6; padding:12px 16px; border-radius:10px; display:flex; align-items:center; gap:10px; text-align:left;">
-            <span style="background:#3b82f6; color:#fff; padding:4px 10px; border-radius:10px; font-size:14px; font-weight:700; flex-shrink:0;">예시 ${i+1}</span>
-            <span style="flex:1; font-size:18px; color:#1e3a8a; font-weight:700; line-height:1.5;">${ex}</span>
-            <button class="help-listen" data-text="${ex.replace(/"/g, '&quot;')}" style="background:#3b82f6; color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; font-size:18px; flex-shrink:0;">🔊</button>
-          </div>
-        `).join('')}
-      </div>
-      <div class="modal-btns">
-        <button class="btn btn-success" id="help-close">알겠어요! ✅</button>
-      </div>
-    </div>
-  `;
-  document.querySelector('.body').appendChild(overlay);
-  state.helpUsed++;
-  if (examples.length > 0) sayForce(examples[0]);
-  document.querySelectorAll('.help-listen').forEach(btn => {
-    btn.addEventListener('click', () => sayForce(btn.dataset.text));
-  });
-  document.getElementById('help-close').addEventListener('click', () => { tts.stop(); overlay.remove(); });
-  overlay.addEventListener('click', (e) => { if (e.target === overlay) { tts.stop(); overlay.remove(); } });
-}
-
+// 개념 설명 모달 (활동 3·4 시작 전)
 function showConceptModal(opts) {
   return new Promise((resolve) => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-bg';
     overlay.innerHTML = `
-      <div class="modal-box" style="max-width:680px;">
+      <div class="modal-box" style="max-width:720px;">
         <div class="modal-emoji">${opts.emoji}</div>
-        <div class="modal-title" style="color:${opts.color || '#7c3aed'};">${opts.title}</div>
-        <div style="background:${opts.bgColor || '#faf5ff'}; border:3px solid ${opts.borderColor || '#c4b5fd'}; padding:18px 22px; border-radius:14px; text-align:left; margin-bottom:18px;">
+        <div class="modal-title" style="color:${opts.color || '#7c3aed'}; font-size:38px;">${opts.title}</div>
+        <div style="background:${opts.bgColor || '#faf5ff'}; border:3px solid ${opts.borderColor || '#c4b5fd'}; padding:22px 26px; border-radius:14px; text-align:left; margin-bottom:18px;">
           ${opts.content}
         </div>
         <div class="modal-btns">
@@ -1098,12 +1170,17 @@ function showConceptModal(opts) {
     `;
     document.querySelector('.body').appendChild(overlay);
     say(opts.speak);
-    document.getElementById('concept-listen').addEventListener('click', () => sayForce(opts.speak));
-    document.getElementById('concept-close').addEventListener('click', () => { tts.stop(); overlay.remove(); resolve(); });
+    document.getElementById('concept-listen').addEventListener('click', () => say(opts.speak));
+    document.getElementById('concept-close').addEventListener('click', () => {
+      overlay.remove();
+      resolve();
+    });
   });
 }
 
-// 활동 1: 분류
+// ========================
+// 활동 1: 분류하기 (선택 → 분류함 클릭 방식)
+// ========================
 let selectedClassifyItem = null;
 
 function renderActivity1() {
@@ -1111,18 +1188,23 @@ function renderActivity1() {
   updateHeader('🎯', '활동 1: 분류하기', '같은 종류끼리 모아보세요', 'blue');
   updateStudentTag();
   updateProgress();
+  
   const a = state.problems.activity;
   const sourceItems = [];
   a.items.forEach((it, idx) => {
-    for (let i = 0; i < a.values[idx]; i++) sourceItems.push({ id: `${it}-${i}`, item: it });
+    for (let i = 0; i < a.values[idx]; i++) {
+      sourceItems.push({ id: `${it}-${i}`, item: it });
+    }
   });
   for (let i = sourceItems.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [sourceItems[i], sourceItems[j]] = [sourceItems[j], sourceItems[i]];
   }
+  
   state.classifyData = {};
   a.items.forEach(it => state.classifyData[it] = 0);
   selectedClassifyItem = null;
+  
   const colors = [
     { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
     { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af' },
@@ -1130,6 +1212,7 @@ function renderActivity1() {
     { bg: '#dcfce7', border: '#10b981', text: '#065f46' },
     { bg: '#ede9fe', border: '#8b5cf6', text: '#5b21b6' },
   ];
+  
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('① 왼쪽 동물을 클릭해서 골라요. ② 그 동물이 들어갈 분류함을 클릭하면 들어가요! (드래그도 됩니다)')}
     <div class="classify-wrap">
@@ -1157,7 +1240,9 @@ function renderActivity1() {
       <button class="btn btn-success" id="check-btn">다 분류했어요 ✅</button>
     </div>
   `;
+  
   setupClassifyDnD();
+  
   document.getElementById('check-btn').addEventListener('click', () => {
     let allCorrect = true;
     let total = 0;
@@ -1171,6 +1256,7 @@ function renderActivity1() {
     });
     const expectedTotal = a.values.reduce((s, v) => s + v, 0);
     const status = document.getElementById('act-status');
+    
     if (total < expectedTotal) {
       status.textContent = `⚠️ 아직 분류하지 않은 동물이 ${expectedTotal-total}마리 있어요!`;
       status.className = 'act-status bad';
@@ -1180,20 +1266,24 @@ function renderActivity1() {
       status.textContent = '🎉 완벽해요! 모두 잘 분류했어요!';
       status.className = 'act-status ok';
       state.done.act1 = true;
-      rewardBig('잘 분류했어요!', '🎯');
+      playSound('correct');
       say('완벽해요! 모두 잘 분류했어요. 이제 표를 만들어 봐요.');
-      setTimeout(() => renderActivity2(), 2000);
+      setTimeout(() => renderActivity2(), 1800);
     } else {
       const hint = wrongItems[0];
       let hintMsg;
-      if (hint.current > hint.target) hintMsg = `💡 힌트: ${getEmoji(hint.name)} ${hint.name}이(가) 너무 많아요. 다시 세어보세요!`;
-      else hintMsg = `💡 힌트: ${getEmoji(hint.name)} ${hint.name}이(가) 부족해요. 다시 세어보세요!`;
+      if (hint.current > hint.target) {
+        hintMsg = `💡 힌트: ${getEmoji(hint.name)} ${hint.name}이(가) 너무 많아요. 다시 세어보세요!`;
+      } else {
+        hintMsg = `💡 힌트: ${getEmoji(hint.name)} ${hint.name}이(가) 부족해요. 다시 세어보세요!`;
+      }
       status.innerHTML = hintMsg;
       status.className = 'act-status hint';
       playSound('wrong');
       say(hintMsg.replace(/💡|🐶|🦜|🐱|🐰|🐠/g, ''));
     }
   });
+  
   setTimeout(() => say('왼쪽에 섞여있는 동물들이 있어요. 동물을 하나 골라서 클릭한 다음, 그 동물이 들어갈 분류함을 눌러주세요. 또는 직접 끌어다 놓아도 돼요.'), 400);
 }
 
@@ -1202,8 +1292,10 @@ function setupClassifyDnD() {
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', JSON.stringify({ id: item.dataset.id, item: item.dataset.item }));
     });
+    
     item.addEventListener('click', () => {
       if (item.classList.contains('used')) return;
+      
       if (selectedClassifyItem && selectedClassifyItem.el === item) {
         item.classList.remove('selected');
         selectedClassifyItem = null;
@@ -1212,10 +1304,14 @@ function setupClassifyDnD() {
         document.getElementById('act-status').className = 'act-status';
         return;
       }
+      
       document.querySelectorAll('.source-item.selected').forEach(s => s.classList.remove('selected'));
+      
       item.classList.add('selected');
       selectedClassifyItem = { id: item.dataset.id, item: item.dataset.item, el: item };
+      
       document.querySelectorAll('.classify-bin').forEach(b => b.classList.add('can-drop'));
+      
       const status = document.getElementById('act-status');
       status.innerHTML = `🐾 <span style="font-size:24px">${getEmoji(item.dataset.item)}</span> 골랐어요! 이 동물이 들어갈 분류함을 눌러주세요.`;
       status.className = 'act-status hint';
@@ -1223,6 +1319,7 @@ function setupClassifyDnD() {
       say('골랐어요. 어떤 분류함에 넣을까요?');
     });
   });
+  
   document.querySelectorAll('.classify-bin').forEach(bin => {
     bin.addEventListener('dragover', (e) => { e.preventDefault(); bin.classList.add('drag-over'); });
     bin.addEventListener('dragleave', () => bin.classList.remove('drag-over'));
@@ -1232,6 +1329,7 @@ function setupClassifyDnD() {
       const data = JSON.parse(e.dataTransfer.getData('text/plain'));
       handleClassifyAttempt(data.item, data.id, bin);
     });
+    
     bin.addEventListener('click', () => {
       if (!selectedClassifyItem) {
         const status = document.getElementById('act-status');
@@ -1249,13 +1347,16 @@ function setupClassifyDnD() {
 function handleClassifyAttempt(itemName, itemId, bin) {
   const sourceEl = document.querySelector(`.source-item[data-id="${itemId}"]`);
   const targetItem = bin.dataset.item;
+  
   if (itemName === targetItem) {
     placeItem(targetItem, itemId);
     if (sourceEl) sourceEl.classList.add('used');
     playSound('correct');
+    
     document.querySelectorAll('.source-item.selected').forEach(s => s.classList.remove('selected'));
     document.querySelectorAll('.classify-bin').forEach(b => b.classList.remove('can-drop'));
     selectedClassifyItem = null;
+    
     const status = document.getElementById('act-status');
     status.innerHTML = `✅ 잘했어요! ${getEmoji(targetItem)} ${targetItem} 분류함에 잘 넣었어요!`;
     status.className = 'act-status ok';
@@ -1281,24 +1382,34 @@ function placeItem(itName, id) {
   document.querySelector(`.count[data-item="${itName}"]`).textContent = state.classifyData[itName] + '마리';
 }
 
-// 활동 2: 표 완성
+// ========================
+// 활동 2: 표 완성 (분류 결과 미리보기 + 합계 자동 + 힌트)
+// ========================
 function renderActivity2() {
   state.phase = 'act2';
   updateHeader('📋', '활동 2: 표 완성하기', '분류한 결과를 표에 적어보세요', 'blue');
   updateStudentTag();
   updateProgress();
+  
   const a = state.problems.activity;
+  
   const previewHtml = `
     <div class="classify-preview">
       <h4>📝 앞에서 분류한 결과</h4>
       <div class="preview-row">
-        ${a.items.map((it) => {
+        ${a.items.map((it, i) => {
           const count = state.classifyData[it] || 0;
-          return `<div class="preview-col"><div class="label"><span class="em">${getEmoji(it)}</span>${it}</div><div class="num">${count}마리</div></div>`;
+          return `
+            <div class="preview-col">
+              <div class="label"><span class="em">${getEmoji(it)}</span>${it}</div>
+              <div class="num">${count}마리</div>
+            </div>
+          `;
         }).join('')}
       </div>
     </div>
   `;
+  
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('위의 분류 결과를 보고, 표 빈칸에 숫자를 적어보세요. 합계는 자동으로 계산돼요!')}
     ${previewHtml}
@@ -1306,16 +1417,20 @@ function renderActivity2() {
       <div class="table-wrap" style="max-width:1100px; width:100%;">
         <h3 style="text-align:center; font-size:21px; font-weight:700; color:#831843; margin-bottom:10px;">${a.title}</h3>
         <table class="data-table">
-          <thead><tr>
-            <th>동물</th>
-            ${a.items.map(it => `<th><span style="font-size:26px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
-            <th>합계</th>
-          </tr></thead>
-          <tbody><tr>
-            <td>학생 수(명)</td>
-            ${a.items.map(it => `<td class="input-cell"><input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="cell-input" data-item="${it}" placeholder="?"></td>`).join('')}
-            <td class="input-cell" style="background:#dbeafe;"><span id="auto-sum" style="font-size:30px; font-weight:700; color:#4f46e5;">0</span></td>
-          </tr></tbody>
+          <thead>
+            <tr>
+              <th>동물</th>
+              ${a.items.map(it => `<th><span style="font-size:26px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
+              <th>합계</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>학생 수(명)</td>
+              ${a.items.map(it => `<td class="input-cell"><input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="cell-input" data-item="${it}" placeholder="?"></td>`).join('')}
+              <td class="input-cell" style="background:#dbeafe;"><span id="auto-sum" style="font-size:30px; font-weight:700; color:#4f46e5;">0</span></td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -1324,6 +1439,7 @@ function renderActivity2() {
       <button class="btn btn-success" id="check-btn">정답 확인 ✅</button>
     </div>
   `;
+  
   function updateAutoSum() {
     let sum = 0;
     document.querySelectorAll('.cell-input').forEach(inp => {
@@ -1332,39 +1448,50 @@ function renderActivity2() {
     });
     document.getElementById('auto-sum').textContent = sum;
   }
+  
   document.querySelectorAll('.cell-input').forEach(inp => {
-    inp.addEventListener('input', () => {
+    inp.addEventListener('input', (e) => {
       let v = inp.value.replace(/[^0-9]/g, '');
       if (v.length > 1) v = v.charAt(v.length - 1);
       inp.value = v;
       inp.classList.remove('correct', 'wrong');
       updateAutoSum();
+      
       if (v.length === 1) {
         const inputs = Array.from(document.querySelectorAll('.cell-input'));
         const idx = inputs.indexOf(inp);
-        if (idx >= 0 && idx < inputs.length - 1) inputs[idx + 1].focus();
+        if (idx >= 0 && idx < inputs.length - 1) {
+          inputs[idx + 1].focus();
+        }
       }
     });
   });
+  
   document.getElementById('check-btn').addEventListener('click', () => {
     let allCorrect = true;
     let firstWrong = null;
     let emptyCount = 0;
+    
     a.items.forEach((it, i) => {
       const inp = document.querySelector(`.cell-input[data-item="${it}"]`);
       const v = parseInt(inp.value);
       if (isNaN(v)) {
-        emptyCount++; allCorrect = false;
+        emptyCount++;
+        allCorrect = false;
         if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: '?' };
       } else if (v !== a.values[i]) {
         allCorrect = false;
-        inp.classList.add('wrong'); inp.classList.remove('correct');
+        inp.classList.add('wrong');
+        inp.classList.remove('correct');
         if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: v };
       } else {
-        inp.classList.add('correct'); inp.classList.remove('wrong');
+        inp.classList.add('correct');
+        inp.classList.remove('wrong');
       }
     });
+    
     const status = document.getElementById('act-status');
+    
     if (emptyCount > 0 && emptyCount === a.items.length) {
       status.innerHTML = '⚠️ 빈칸을 모두 채워주세요!';
       status.className = 'act-status bad';
@@ -1372,13 +1499,14 @@ function renderActivity2() {
       say('빈칸을 모두 채워주세요.');
       return;
     }
+    
     if (allCorrect) {
       status.textContent = '🎉 표를 완벽하게 완성했어요!';
       status.className = 'act-status ok';
       state.done.act2 = true;
-      rewardBig('표 완성!', '📋');
+      playSound('correct');
       say('표를 완벽하게 완성했어요! 이제 그래프를 그려 봐요.');
-      setTimeout(() => renderActivity3(), 2000);
+      setTimeout(() => renderActivity3(), 1800);
     } else {
       if (firstWrong) {
         const realCount = state.classifyData[firstWrong.name] || firstWrong.expected;
@@ -1389,51 +1517,69 @@ function renderActivity2() {
       playSound('wrong');
     }
   });
+  
   setTimeout(() => say('위에 분류한 결과를 보고, 표 빈칸에 숫자를 적어주세요. 합계는 자동으로 계산돼요.'), 400);
 }
 
-// 활동 3: 세로 그래프
+// ========================
+// 활동 3: 세로 그래프 (○) - 표 참고 박스 포함
+// ★ 변경: 개념 모달 글씨 크기 키우고 핵심 단어 하이라이트, 한 줄 표현
+// ========================
 async function renderActivity3() {
   state.phase = 'act3';
   updateHeader('📊', '활동 3: 세로 그래프', '○를 그려 그래프를 완성해요', 'pink');
   updateStudentTag();
   updateProgress();
+  
+  // 개념 설명 모달 - 글씨 크기 키우고 핵심 단어 하이라이트
   await showConceptModal({
-    emoji: '📊', title: '왜 그래프로 그릴까요?', color: '#ec4899',
-    bgColor: '#fdf2f8', borderColor: '#f9a8d4',
+    emoji: '📊',
+    title: '왜 그래프로 그릴까요?',
+    color: '#ec4899',
+    bgColor: '#fdf2f8',
+    borderColor: '#f9a8d4',
     content: `
-      <p style="font-size:21px; font-weight:700; color:#831843; margin-bottom:12px; line-height:1.6;">
-        🤔 표 안의 숫자는 정확하지만,<br>
-        <strong style="color:#dc2626;">누가 가장 많은지 한눈에 보기는 어려워요!</strong>
+      <p style="font-size:24px; font-weight:700; color:#831843; margin-bottom:14px; line-height:1.5;">
+        🤔 표 안의 숫자는 정확하지만,
       </p>
-      <p style="font-size:21px; font-weight:700; color:#831843; margin-bottom:12px; line-height:1.6;">
-        🎨 그래서 숫자만큼 <strong style="color:#ec4899;">○ 동그라미</strong>를 그려서<br>
-        그림으로 나타내요.
+      <p style="font-size:30px; font-weight:900; color:#dc2626; margin-bottom:18px; line-height:1.4; text-align:center; background:#fff; padding:14px 20px; border-radius:14px; border:3px solid #fca5a5;">
+        누가 가장 많은지<br>
+        <span style="background:linear-gradient(180deg, transparent 60%, #fde68a 60%);">한눈에 보기는 어려워요!</span>
       </p>
-      <div style="background:#fff; border:2px dashed #ec4899; padding:12px 16px; border-radius:12px; margin-top:12px;">
+      <p style="font-size:24px; font-weight:700; color:#831843; margin-bottom:14px; line-height:1.5;">
+        🎨 그래서 숫자만큼 <span style="background:#fce7f3; color:#be185d; padding:2px 10px; border-radius:8px;">○ 동그라미</span>를 그려서 그림으로 나타내요.
+      </p>
+      <div style="background:#fff; border:2px dashed #ec4899; padding:14px 18px; border-radius:12px; margin-top:14px;">
         <p style="font-size:19px; font-weight:700; color:#9f1239; line-height:1.6;">
           ✨ <strong>사용 방법</strong><br>
           • 칸을 <strong>클릭</strong>하면 ○가 채워져요<br>
           • 한 칸에 <strong>한 개</strong>만 그려요<br>
           • <strong>아래부터</strong> 빈틈없이 채워요
         </p>
-      </div>`,
+      </div>
+    `,
     speak: '왜 그래프로 그릴까요? 표 안의 숫자는 정확하지만 누가 가장 많은지 한눈에 보기는 어려워요. 그래서 숫자만큼 동그라미를 그려서 그림으로 나타내요. 칸을 클릭하면 동그라미가 채워져요. 한 칸에 한 개만, 아래부터 빈틈없이 채워주세요.'
   });
+  
   const a = state.problems.activity;
   state.vertGraph = {};
   a.items.forEach(it => state.vertGraph[it] = 0);
+  
   const maxVal = Math.max(...a.values);
   const yLabels = [];
   for (let y = maxVal; y >= 1; y--) yLabels.push(y);
+  
   const refTableHtml = `
     <div class="ref-table">
       <div class="ref-label">📋 표 참고</div>
       <div class="ref-items">
-        ${a.items.map((it, i) => `<div class="ref-item"><span class="em">${getEmoji(it)}</span>${it}: <span class="n">${a.values[i]}</span></div>`).join('')}
+        ${a.items.map((it, i) => `
+          <div class="ref-item"><span class="em">${getEmoji(it)}</span>${it}: <span class="n">${a.values[i]}</span></div>
+        `).join('')}
       </div>
     </div>
   `;
+  
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('아래 칸을 클릭해서 ○를 그려주세요! 한 칸에 한 개씩, 아래부터 빈틈없이 채워요.')}
     ${refTableHtml}
@@ -1454,12 +1600,15 @@ async function renderActivity3() {
       <button class="btn btn-success" id="check-btn">완성! ✅</button>
     </div>
   `;
+  
   document.querySelectorAll('.graph-vert .cell').forEach(cell => {
     cell.addEventListener('click', () => {
       const it = cell.dataset.item;
       const row = parseInt(cell.dataset.row);
       const cur = state.vertGraph[it] || 0;
+      
       document.querySelectorAll('.graph-vert .col-wrong').forEach(c => c.classList.remove('col-wrong'));
+      
       if (cell.classList.contains('filled')) {
         for (let r = row; r <= cur; r++) {
           const c = document.querySelector(`.graph-vert .cell[data-item="${it}"][data-row="${r}"]`);
@@ -1470,8 +1619,10 @@ async function renderActivity3() {
         for (let r = 1; r <= row; r++) {
           const c = document.querySelector(`.graph-vert .cell[data-item="${it}"][data-row="${r}"]`);
           if (c && !c.classList.contains('filled')) {
-            c.classList.add('filled'); c.textContent = '○';
-            c.style.color = '#ec4899'; c.style.fontWeight = '900';
+            c.classList.add('filled');
+            c.textContent = '○';
+            c.style.color = '#ec4899';
+            c.style.fontWeight = '900';
           }
         }
         state.vertGraph[it] = row;
@@ -1479,89 +1630,118 @@ async function renderActivity3() {
       }
     });
   });
+  
   document.getElementById('reset-btn').addEventListener('click', () => {
-    document.querySelectorAll('.graph-vert .cell.filled').forEach(c => { c.classList.remove('filled'); c.textContent = ''; });
+    document.querySelectorAll('.graph-vert .cell.filled').forEach(c => {
+      c.classList.remove('filled'); c.textContent = '';
+    });
     document.querySelectorAll('.graph-vert .col-wrong').forEach(c => c.classList.remove('col-wrong'));
     a.items.forEach(it => state.vertGraph[it] = 0);
   });
+  
   document.getElementById('check-btn').addEventListener('click', () => {
-    let allCorrect = true; let firstWrong = null; let wrongItems = [];
+    let allCorrect = true;
+    let firstWrong = null;
+    let wrongItems = [];
+    
     document.querySelectorAll('.graph-vert .col-wrong').forEach(c => c.classList.remove('col-wrong'));
+    
     a.items.forEach((it, i) => {
       if (state.vertGraph[it] !== a.values[i]) {
-        allCorrect = false; wrongItems.push(it);
+        allCorrect = false;
+        wrongItems.push(it);
         if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: state.vertGraph[it] };
       }
     });
+    
     const status = document.getElementById('act-status');
     if (allCorrect) {
       status.textContent = '🎉 완벽한 세로 그래프예요!';
       status.className = 'act-status ok';
       state.done.act3 = true;
-      rewardBig('세로 그래프 완성!', '📊');
+      playSound('correct');
       say('완벽한 세로 그래프예요! 이번엔 가로로 그려 봐요.');
-      setTimeout(() => renderActivity4(), 2000);
+      setTimeout(() => renderActivity4(), 1800);
     } else {
       wrongItems.forEach(it => {
         document.querySelectorAll(`.graph-vert .cell[data-item="${it}"]`).forEach(c => c.classList.add('col-wrong'));
         const xLabel = document.querySelector(`.graph-vert .x-label[data-item="${it}"]`);
         if (xLabel) xLabel.classList.add('col-wrong');
       });
+      
       status.innerHTML = `💡 힌트: ${getEmoji(firstWrong.name)} <strong>${firstWrong.name}</strong>는 <strong style="color:#dc2626; font-size:24px;">${firstWrong.expected}개</strong>를 그려야 해요! (지금은 ${firstWrong.current}개) - 빨간 네모 친 곳을 확인해보세요`;
       status.className = 'act-status hint';
       playSound('wrong');
       say(`${firstWrong.name}는 ${firstWrong.expected}개를 그려야 해요. 빨간 네모 친 곳을 다시 확인해보세요.`);
     }
   });
+  
   setTimeout(() => say('위의 표를 참고해서 표의 숫자만큼 동그라미를 그려보세요. 한 칸에 한 개씩, 아래부터 빈틈없이요.'), 400);
 }
 
-// 활동 4: 가로 그래프
+// ========================
+// 활동 4: 가로 그래프 - 표 참고 + 기호 선택
+// ★ 변경: 개념 모달 글씨 크기 키우고 한 줄 표현
+// ========================
 async function renderActivity4() {
   state.phase = 'act4';
   updateHeader('📊', '활동 4: 가로 그래프', '내가 좋아하는 기호로 가로로 그려요', 'green');
   updateStudentTag();
   updateProgress();
+  
   await showConceptModal({
-    emoji: '🔄', title: '가로 그래프도 그려봐요!', color: '#10b981',
-    bgColor: '#ecfdf5', borderColor: '#6ee7b7',
+    emoji: '🔄',
+    title: '가로 그래프도 그려봐요!',
+    color: '#10b981',
+    bgColor: '#ecfdf5',
+    borderColor: '#6ee7b7',
     content: `
-      <p style="font-size:21px; font-weight:700; color:#064e3b; margin-bottom:12px; line-height:1.6;">
-        🤔 같은 자료를 <strong style="color:#dc2626;">가로</strong>로도<br>
-        <strong style="color:#dc2626;">세로</strong>로도 그릴 수 있어요!
+      <p style="font-size:30px; font-weight:900; color:#065f46; margin-bottom:18px; line-height:1.4; text-align:center; background:#fff; padding:14px 20px; border-radius:14px; border:3px solid #6ee7b7;">
+        같은 자료를 <span style="color:#dc2626;">가로</span>로도<br>
+        <span style="color:#dc2626;">세로</span>로도 그릴 수 있어요!
       </p>
-      <p style="font-size:21px; font-weight:700; color:#064e3b; margin-bottom:12px; line-height:1.6;">
-        ✨ 이번엔 동물 이름이 <strong style="color:#10b981;">왼쪽</strong>에 있고,<br>
-        숫자가 <strong style="color:#10b981;">아래</strong>에 있어요.
+      <p style="font-size:22px; font-weight:700; color:#064e3b; margin-bottom:14px; line-height:1.5;">
+        ✨ 이번엔 동물 이름이 <span style="background:#d1fae5; color:#065f46; padding:2px 10px; border-radius:8px;">왼쪽</span>에 있고, 숫자가 <span style="background:#d1fae5; color:#065f46; padding:2px 10px; border-radius:8px;">아래</span>에 있어요.
       </p>
-      <div style="background:#fff; border:2px dashed #10b981; padding:12px 16px; border-radius:12px; margin-top:12px;">
-        <p style="font-size:19px; font-weight:700; color:#065f46; line-height:1.6;">
+      <div style="background:#fff; border:2px dashed #10b981; padding:14px 18px; border-radius:12px; margin-top:14px;">
+        <p style="font-size:20px; font-weight:700; color:#065f46; line-height:1.6;">
           🎨 <strong>좋아하는 기호를 골라서</strong> 그려봐요!<br>
           하트 ❤️, 별 ⭐, 세모 △, 동그라미 ○ 등<br>
           어떤 기호로 그려도 그래프는 똑같이 만들어져요!
         </p>
-      </div>`,
+      </div>
+    `,
     speak: '같은 자료를 가로로도 세로로도 그릴 수 있어요. 이번엔 동물 이름이 왼쪽에 있고 숫자가 아래에 있어요. 좋아하는 기호를 골라서 그려봐요. 하트, 별, 세모, 동그라미 어떤 기호로 그려도 그래프는 똑같이 만들어져요!'
   });
+  
   const a = state.problems.activity;
   state.horizGraph = {};
   a.items.forEach(it => state.horizGraph[it] = 0);
+  
   const maxVal = Math.max(...a.values);
   const reversedItems = [...a.items].reverse();
+  
   const refTableHtml = `
     <div class="ref-table">
       <div class="ref-label">📋 표 참고</div>
       <div class="ref-items">
-        ${a.items.map((it, i) => `<div class="ref-item"><span class="em">${getEmoji(it)}</span>${it}: <span class="n">${a.values[i]}</span></div>`).join('')}
+        ${a.items.map((it, i) => `
+          <div class="ref-item"><span class="em">${getEmoji(it)}</span>${it}: <span class="n">${a.values[i]}</span></div>
+        `).join('')}
       </div>
     </div>
   `;
-  let currentSymbol = '❤️';
+  
+  let currentSymbol = '✕';
   const symbols = [
-    { sym: '❤️', color: '' }, { sym: '⭐', color: '' },
-    { sym: '☆', color: '#f59e0b' }, { sym: '△', color: '#7c3aed' },
-    { sym: '○', color: '#3b82f6' }, { sym: '✕', color: '#ef4444' }
+    { sym: '✕', color: '#ef4444' },
+    { sym: '○', color: '#3b82f6' },
+    { sym: '❤️', color: '' },
+    { sym: '⭐', color: '' },
+    { sym: '△', color: '#7c3aed' },
+    { sym: '☆', color: '#f59e0b' }
   ];
+  
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('동물이 왼쪽, 수가 아래에 있어요. 기호를 골라서 표의 숫자만큼 그려주세요!')}
     <div style="display:flex; gap:12px; flex-shrink:0;">
@@ -1588,6 +1768,7 @@ async function renderActivity4() {
       <button class="btn btn-success" id="check-btn">완성! ✅</button>
     </div>
   `;
+  
   document.querySelectorAll('.symbol-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.symbol-btn').forEach(b => b.classList.remove('active'));
@@ -1596,12 +1777,15 @@ async function renderActivity4() {
       playSound('click');
     });
   });
+  
   document.querySelectorAll('.graph-horiz .cell').forEach(cell => {
     cell.addEventListener('click', () => {
       const it = cell.dataset.item;
       const col = parseInt(cell.dataset.col);
       const cur = state.horizGraph[it] || 0;
+      
       document.querySelectorAll('.graph-horiz .row-wrong').forEach(c => c.classList.remove('row-wrong'));
+      
       if (cell.classList.contains('filled')) {
         for (let c = col; c <= cur; c++) {
           const cc = document.querySelector(`.graph-horiz .cell[data-item="${it}"][data-col="${c}"]`);
@@ -1612,7 +1796,8 @@ async function renderActivity4() {
         for (let c = 1; c <= col; c++) {
           const cc = document.querySelector(`.graph-horiz .cell[data-item="${it}"][data-col="${c}"]`);
           if (cc && !cc.classList.contains('filled')) {
-            cc.classList.add('filled'); cc.textContent = currentSymbol;
+            cc.classList.add('filled');
+            cc.textContent = currentSymbol;
             const symData = symbols.find(s => s.sym === currentSymbol);
             if (symData && symData.color) cc.style.color = symData.color;
           }
@@ -1622,52 +1807,68 @@ async function renderActivity4() {
       }
     });
   });
+  
   document.getElementById('reset-btn').addEventListener('click', () => {
-    document.querySelectorAll('.graph-horiz .cell.filled').forEach(c => { c.classList.remove('filled'); c.textContent = ''; });
+    document.querySelectorAll('.graph-horiz .cell.filled').forEach(c => {
+      c.classList.remove('filled'); c.textContent = '';
+    });
     document.querySelectorAll('.graph-horiz .row-wrong').forEach(c => c.classList.remove('row-wrong'));
     a.items.forEach(it => state.horizGraph[it] = 0);
   });
+  
   document.getElementById('check-btn').addEventListener('click', () => {
-    let allCorrect = true; let firstWrong = null; let wrongItems = [];
+    let allCorrect = true;
+    let firstWrong = null;
+    let wrongItems = [];
+    
     document.querySelectorAll('.graph-horiz .row-wrong').forEach(c => c.classList.remove('row-wrong'));
+    
     a.items.forEach((it, i) => {
       if (state.horizGraph[it] !== a.values[i]) {
-        allCorrect = false; wrongItems.push(it);
+        allCorrect = false;
+        wrongItems.push(it);
         if (!firstWrong) firstWrong = { name: it, expected: a.values[i], current: state.horizGraph[it] };
       }
     });
+    
     const status = document.getElementById('act-status');
     if (allCorrect) {
       status.textContent = '🎉 가로 그래프도 완성!';
       status.className = 'act-status ok';
       state.done.act4 = true;
-      rewardBig('가로 그래프 완성!', '🎨');
+      playSound('correct');
       say('가로 그래프도 완성! 정말 잘했어요. 이제 두 그래프를 비교해 봐요.');
-      setTimeout(() => renderActivity5(), 2000);
+      setTimeout(() => renderActivity5(), 1800);
     } else {
       wrongItems.forEach(it => {
         document.querySelectorAll(`.graph-horiz .cell[data-item="${it}"]`).forEach(c => c.classList.add('row-wrong'));
         const yLabel = document.querySelector(`.graph-horiz .y-label[data-item="${it}"]`);
         if (yLabel) yLabel.classList.add('row-wrong');
       });
+      
       status.innerHTML = `💡 힌트: ${getEmoji(firstWrong.name)} <strong>${firstWrong.name}</strong>는 <strong style="color:#dc2626; font-size:24px;">${firstWrong.expected}개</strong>를 그려야 해요! (지금은 ${firstWrong.current}개) - 빨간 네모 친 곳을 확인해보세요`;
       status.className = 'act-status hint';
       playSound('wrong');
       say(`${firstWrong.name}는 ${firstWrong.expected}개를 그려야 해요. 빨간 네모 친 곳을 다시 확인해보세요.`);
     }
   });
+  
   setTimeout(() => say('이번에는 가로 그래프예요. 좋아하는 기호를 골라서 표의 숫자만큼 그려주세요.'), 400);
 }
 
-// 활동 5: 비교
+// ========================
+// 활동 5: 비교 - 학생이 직접 답변하기
+// ========================
 function renderActivity5() {
   state.phase = 'act5';
   updateHeader('🔍', '활동 5: 두 그래프 비교', '같은 점, 다른 점을 찾아봐요', 'green');
   updateStudentTag();
   updateProgress();
+  
   const a = state.problems.activity;
   const maxVal = Math.max(...a.values);
   const reversedItems = [...a.items].reverse();
+  
   const vertHtml = `
     <div style="background:#fdf2f8; border-radius:14px; padding:10px; border:2px solid #f9a8d4;">
       <div style="text-align:center; background:#ec4899; color:#fff; padding:5px 12px; border-radius:10px; font-weight:700; font-size:14px; display:inline-block; margin-bottom:6px;">세로 ○ 그래프</div>
@@ -1690,6 +1891,7 @@ function renderActivity5() {
       </div>
     </div>
   `;
+  
   const horizHtml = `
     <div style="background:#ecfdf5; border-radius:14px; padding:10px; border:2px solid #6ee7b7;">
       <div style="text-align:center; background:#10b981; color:#fff; padding:5px 12px; border-radius:10px; font-weight:700; font-size:14px; display:inline-block; margin-bottom:6px;">가로 ✕ 그래프</div>
@@ -1713,13 +1915,19 @@ function renderActivity5() {
       </div>
     </div>
   `;
+  
   const maxItem = a.items[a.values.indexOf(Math.max(...a.values))];
   const minItem = a.items[a.values.indexOf(Math.min(...a.values))];
+  
   document.getElementById('scene').innerHTML = `
     ${tutorialHTML('두 그래프를 잘 보고 아래 질문에 답해보세요!')}
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; flex-shrink:0;">${vertHtml}${horizHtml}</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; flex-shrink:0;">
+      ${vertHtml}
+      ${horizHtml}
+    </div>
     <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:16px; padding:16px 22px; border:3px solid #f59e0b; flex:1; display:flex; flex-direction:column; gap:10px; min-height:0; overflow:hidden;">
       <h3 style="font-size:21px; font-weight:700; color:#78350f; flex-shrink:0;">🤔 그래프를 보고 답해봐요!</h3>
+      
       <div style="display:flex; gap:12px; flex:1; min-height:0;">
         <div style="flex:1; background:#fff; border:3px solid #fbbf24; border-radius:14px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; min-height:0;">
           <div style="font-size:18px; font-weight:700; color:#92400e; line-height:1.4;">
@@ -1735,6 +1943,7 @@ function renderActivity5() {
           </div>
           <div id="q1-feedback" style="font-size:15px; font-weight:700; min-height:24px; flex-shrink:0;"></div>
         </div>
+        
         <div style="flex:1; background:#fff; border:3px solid #60a5fa; border-radius:14px; padding:12px 16px; display:flex; flex-direction:column; gap:8px; min-height:0;">
           <div style="font-size:18px; font-weight:700; color:#1e40af; line-height:1.4;">
             ❷ 가장 <span style="color:#2563eb;">적은</span> 학생이 좋아하는 동물은?
@@ -1756,17 +1965,21 @@ function renderActivity5() {
       <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5;">퀴즈로 가기 🎯</button>
     </div>
   `;
+  
   const answers = { 1: null, 2: null };
+  
   document.querySelectorAll('.q-opt').forEach(btn => {
     btn.addEventListener('click', () => {
       const q = btn.dataset.q;
       const ans = btn.dataset.ans;
       const target = q === '1' ? maxItem : minItem;
       const fb = document.getElementById(`q${q}-feedback`);
+      
       document.querySelectorAll(`.q-opt[data-q="${q}"]`).forEach(b => {
         b.style.background = '#fff';
         b.style.borderColor = q === '1' ? '#fef3c7' : '#dbeafe';
       });
+      
       if (ans === target) {
         btn.style.background = '#dcfce7';
         btn.style.borderColor = '#10b981';
@@ -1782,119 +1995,28 @@ function renderActivity5() {
         say(`아쉬워요. 그래프를 다시 보고 ${q==='1'?'가장 많은':'가장 적은'} 동물을 골라요.`);
         answers[q] = false;
       }
+      
       if (answers[1] && answers[2]) {
         const nextBtn = document.getElementById('next-btn');
         nextBtn.disabled = false;
         nextBtn.style.opacity = '1';
         document.getElementById('act-status').innerHTML = '🎉 두 질문 모두 잘 맞췄어요! 그래프는 한눈에 비교하기 정말 쉬워요!';
         document.getElementById('act-status').className = 'act-status ok';
-        rewardBig('비교 잘했어요!', '🔍');
       }
     });
   });
+  
   document.getElementById('next-btn').addEventListener('click', () => {
     state.done.act5 = true;
-    renderReflection();
+    renderQuiz();
   });
+  
   setTimeout(() => say('두 그래프를 잘 보고 답해보세요. 가장 많은 학생이 좋아하는 동물은 무엇인가요? 그리고 가장 적은 학생이 좋아하는 동물은 무엇인가요?'), 400);
 }
 
-// 중간 성찰 (★ 슬라이드 팝업 형식 - 한 화면에 한 가지씩 큰 글씨로)
-function renderReflection() {
-  state.phase = 'reflect';
-  updateHeader('💭', '잠깐, 배운 것을 정리해봐요', '오늘 배운 것을 떠올려봐요', 'orange');
-  updateStudentTag();
-  updateProgress();
-  const a = state.problems.activity;
-  const maxItem = a.items[a.values.indexOf(Math.max(...a.values))];
-  const minItem = a.items[a.values.indexOf(Math.min(...a.values))];
-  
-  const slides = [
-    {
-      emoji: '📋',
-      title: '표로 정리하면',
-      bg: 'linear-gradient(135deg,#fef3c7,#fde68a)',
-      border: '#f59e0b',
-      titleColor: '#78350f',
-      content: `<p style="font-size:42px; font-weight:700; color:#451a03; line-height:1.7; text-align:center;">
-        정확한 <span style="color:#dc2626;">숫자</span>를 알 수 있어요!<br><br>
-        <span style="color:#dc2626;">합계</span>도 한 번에 보여요!
-      </p>`,
-      speak: '표로 정리하면 정확한 숫자를 알 수 있어요. 합계도 한 번에 보여요!'
-    },
-    {
-      emoji: '📊',
-      title: '그래프로 그리면',
-      bg: 'linear-gradient(135deg,#fce7f3,#fbcfe8)',
-      border: '#ec4899',
-      titleColor: '#831843',
-      content: `<p style="font-size:42px; font-weight:700; color:#500724; line-height:1.7; text-align:center;">
-        누가 <span style="color:#9333ea;">가장 많은지</span><br><br>
-        <span style="color:#9333ea;">한눈에</span> 비교할 수 있어요!
-      </p>`,
-      speak: '그래프로 그리면 누가 가장 많은지 한눈에 비교할 수 있어요!'
-    },
-    {
-      emoji: '🌟',
-      title: '오늘 우리가 배운 것',
-      bg: 'linear-gradient(135deg,#ede9fe,#ddd6fe)',
-      border: '#a78bfa',
-      titleColor: '#4c1d95',
-      content: `
-        <ul style="list-style:none; display:flex; flex-direction:column; gap:18px; padding:0; font-size:28px; font-weight:700; color:#4c1d95; line-height:1.5; text-align:left; max-width:760px; margin:0 auto;">
-          <li>✏️ 자료를 <strong style="color:#dc2626;">표</strong>로 정리했어요</li>
-          <li>🎨 <strong style="color:#ec4899;">○ 그래프</strong>(세로)와 <strong style="color:#10b981;">기호 그래프</strong>(가로)를 그렸어요</li>
-          <li>🔍 가장 많은 동물: ${getEmoji(maxItem)} <strong style="color:#dc2626;">${maxItem} (${Math.max(...a.values)}명)</strong></li>
-          <li>🔍 가장 적은 동물: ${getEmoji(minItem)} <strong style="color:#2563eb;">${minItem} (${Math.min(...a.values)}명)</strong></li>
-        </ul>`,
-      speak: `오늘 우리는 자료를 표로 정리하고 그래프로 그렸어요. 가장 많은 동물은 ${maxItem} ${Math.max(...a.values)}명이고, 가장 적은 동물은 ${minItem} ${Math.min(...a.values)}명이에요.`
-    }
-  ];
-  
-  let idx = 0;
-  
-  function showSlide(i) {
-    const s = slides[i];
-    const isLast = (i === slides.length - 1);
-    document.getElementById('scene').innerHTML = `
-      <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:10px 40px; gap:24px;">
-        <div style="background:${s.bg}; border-radius:32px; padding:36px 50px; border:6px solid ${s.border}; max-width:1050px; width:100%; box-shadow:0 12px 32px rgba(0,0,0,0.12); text-align:center;">
-          <div style="font-size:120px; line-height:1; margin-bottom:10px; animation: bounce 2s infinite;">${s.emoji}</div>
-          <h2 style="font-size:48px; font-weight:700; color:${s.titleColor}; margin-bottom:24px; letter-spacing:-0.02em;">${s.title}</h2>
-          ${s.content}
-        </div>
-        
-        <div style="display:flex; gap:10px; align-items:center;">
-          ${slides.map((_, j) => `<div style="width:${j===i?40:14}px; height:14px; border-radius:7px; background:${j===i?'#7c3aed':'#d1d5db'}; transition:all 0.3s;"></div>`).join('')}
-        </div>
-        
-        <div style="display:flex; gap:14px; align-items:center;">
-          ${i > 0 ? '<button class="btn btn-ghost" id="prev-slide">⬅️ 이전</button>' : ''}
-          <button class="btn btn-warn" id="speak-slide" title="다시 듣기" style="padding:14px 22px;">🔊 다시 듣기</button>
-          <button class="btn ${isLast ? 'btn-success' : 'btn-primary'} btn-lg" id="next-slide">
-            ${isLast ? '퀴즈 도전 🎯' : '다음 ➡️'}
-          </button>
-        </div>
-      </div>
-    `;
-    
-    setTimeout(() => say(s.speak), 300);
-    
-    document.getElementById('next-slide').addEventListener('click', () => {
-      tts.stop();
-      if (isLast) renderQuiz();
-      else { idx++; showSlide(idx); }
-    });
-    if (i > 0) {
-      document.getElementById('prev-slide').addEventListener('click', () => { tts.stop(); idx--; showSlide(idx); });
-    }
-    document.getElementById('speak-slide').addEventListener('click', () => sayForce(s.speak));
-  }
-  
-  showSlide(0);
-}
-
+// ========================
 // 퀴즈
+// ========================
 function renderQuiz() {
   state.phase = 'quiz';
   state.quizIdx = 0;
@@ -1909,11 +2031,14 @@ function showQuizQuestion() {
     renderPostRecord();
     return;
   }
+  
   updateHeader('🎯', '퀴즈 도전', `문제 ${state.quizIdx + 1} / ${quizzes.length}`, '');
   updateStudentTag();
   updateProgress();
+  
   const q = quizzes[state.quizIdx];
   const fullText = `${q.q} 1번, ${q.options[0]}. 2번, ${q.options[1]}.`;
+  
   document.getElementById('scene').innerHTML = `
     <div class="quiz-wrap">
       <div class="quiz-q">
@@ -1931,6 +2056,7 @@ function showQuizQuestion() {
       </div>
     </div>
   `;
+  
   document.querySelectorAll('.quiz-opt').forEach(btn => {
     btn.addEventListener('click', () => {
       const sel = parseInt(btn.dataset.idx);
@@ -1939,15 +2065,18 @@ function showQuizQuestion() {
       showQuizFeedback(correct, q.desc);
     });
   });
+  
   setTimeout(() => say(fullText), 400);
 }
 
 function showQuizFeedback(correct, desc) {
-  if (correct) rewardFireworks();
+  if (correct) playSound('cheer');
   else playSound('wrong');
-  say(correct ? '정답이에요! ' + desc : '아쉬워요. 다시 한 번 잘 생각해봐요.');
+  say(correct ? '정답이에요! ' + desc : '아쉬워요. ' + desc);
+  
   const overlay = document.createElement('div');
   overlay.className = 'modal-bg';
+  
   if (correct) {
     overlay.innerHTML = `
       <div class="modal-box">
@@ -1962,12 +2091,14 @@ function showQuizFeedback(correct, desc) {
       <div class="modal-box">
         <div class="modal-emoji">😢</div>
         <div class="modal-title" style="color:#ef4444">아쉬워요!</div>
-        <div class="modal-text">다시 한 번 잘 생각해보고 골라봐요!</div>
+        <div class="modal-text">${desc}</div>
         <button class="btn btn-warn" id="modal-retry">🔄 다시 풀기</button>
       </div>
     `;
   }
+  
   document.querySelector('.body').appendChild(overlay);
+  
   if (correct) {
     document.getElementById('modal-next').addEventListener('click', () => {
       overlay.remove();
@@ -1983,136 +2114,163 @@ function showQuizFeedback(correct, desc) {
   }
 }
 
-// 사후 녹음 (★ 컴팩트 버전 - 잘림 수정)
+// ========================
+// 사후 녹음
+// ★ 변경: 맨 위 튜토리얼 박스 제거 (질문 박스만 남김)
+// ★ 변경: 마이크 아래에만 활동 방법 안내
+// ========================
 function renderPostRecord() {
   state.phase = 'post';
   updateHeader('🎤', '마무리 말하기', '학습 전과 같은 자료를 다시 보고 말해요', 'orange');
   updateStudentTag();
   updateProgress();
+  
   const p = state.problems.post;
   const maxVal = Math.max(...p.values);
+  
+  // ★ 재디자인: 표 - 글씨 크게, 셀 크게
   const tableHtml = `
-    <div style="background:#fff; border-radius:10px; padding:6px 10px; border:2px solid #c4b5fd;">
-      <div style="text-align:center; margin-bottom:4px;"><span style="background:#7c3aed; color:#fff; padding:3px 10px; border-radius:8px; font-weight:700; font-size:13px;">📋 표</span></div>
-      <table style="width:100%; border-collapse:collapse;">
+    <div style="background:#fff; border-radius:16px; padding:14px 18px; border:3px solid #c4b5fd; height:100%; display:flex; flex-direction:column;">
+      <div style="text-align:center; margin-bottom:10px;">
+        <span style="background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; padding:8px 22px; border-radius:14px; font-weight:700; font-size:20px; box-shadow:0 3px 0 #5b21b6;">📋 표로 보기</span>
+      </div>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; flex:1;">
         <thead><tr>
-          <th style="padding:3px 4px; background:#f3e8ff; color:#6b21a8; font-size:12px; border:1px solid #ddd6fe;">항목</th>
-          ${p.items.map(it => `<th style="padding:3px 4px; background:#f3e8ff; color:#6b21a8; font-size:12px; border:1px solid #ddd6fe;"><span style="font-size:18px">${getEmoji(it)}</span><br>${it}</th>`).join('')}
-          <th style="padding:3px 4px; background:#f3e8ff; color:#6b21a8; font-size:12px; border:1px solid #ddd6fe;">합계</th>
+          <th style="padding:10px 4px; background:linear-gradient(135deg,#f3e8ff,#e9d5ff); color:#6b21a8; font-size:18px; border:2px solid #c4b5fd; border-radius:8px 0 0 0;">항목</th>
+          ${p.items.map((it,i) => `<th style="padding:10px 4px; background:linear-gradient(135deg,#f3e8ff,#e9d5ff); color:#6b21a8; font-size:17px; border:2px solid #c4b5fd;"><span style="font-size:34px; line-height:1.2; display:block;">${getEmoji(it)}</span>${it}</th>`).join('')}
+          <th style="padding:10px 4px; background:linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; font-size:18px; border:2px solid #fbbf24; border-radius:0 8px 0 0;">합계</th>
         </tr></thead>
         <tbody><tr>
-          <td style="padding:4px; font-size:12px; font-weight:700; color:#1f2937; text-align:center; border:1px solid #ddd6fe;">학생수(${p.unit})</td>
-          ${p.values.map(v => `<td style="padding:4px; font-size:16px; font-weight:700; color:#7c3aed; text-align:center; border:1px solid #ddd6fe;">${v}</td>`).join('')}
-          <td style="padding:4px; font-size:16px; font-weight:700; color:#7c3aed; text-align:center; border:1px solid #ddd6fe;">${p.values.reduce((a,b)=>a+b,0)}</td>
+          <td style="padding:14px 4px; font-size:17px; font-weight:700; color:#1f2937; text-align:center; background:#faf5ff; border:2px solid #c4b5fd;">학생 수(${p.unit})</td>
+          ${p.values.map(v => `<td style="padding:14px 4px; font-size:32px; font-weight:900; color:#7c3aed; text-align:center; background:#fff; border:2px solid #c4b5fd;">${v}</td>`).join('')}
+          <td style="padding:14px 4px; font-size:32px; font-weight:900; color:#d97706; text-align:center; background:#fffbeb; border:2px solid #fbbf24;">${p.values.reduce((a,b)=>a+b,0)}</td>
         </tr></tbody>
       </table>
     </div>
   `;
+  
+  // ★ 재디자인: 그래프 - 셀 크기 키우고 글씨도 크게
   const graphHtml = `
-    <div style="background:#fff; border-radius:10px; padding:6px 8px; border:2px solid #c4b5fd;">
-      <div style="text-align:center; margin-bottom:4px;"><span style="background:#7c3aed; color:#fff; padding:3px 10px; border-radius:8px; font-weight:700; font-size:13px;">📊 그래프</span></div>
-      <div style="display:grid; grid-template-columns: 28px repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 11px) 26px;">
+    <div style="background:#fff; border-radius:16px; padding:14px 18px; border:3px solid #c4b5fd; height:100%; display:flex; flex-direction:column;">
+      <div style="text-align:center; margin-bottom:10px;">
+        <span style="background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; padding:8px 22px; border-radius:14px; font-weight:700; font-size:20px; box-shadow:0 3px 0 #5b21b6;">📊 그래프로 보기</span>
+      </div>
+      <div style="display:grid; grid-template-columns: 44px repeat(${p.items.length}, 1fr); grid-template-rows: repeat(${maxVal}, 1fr) 56px; flex:1; min-height:0;">
         ${(() => {
           let html = '';
           for (let y = maxVal; y >= 1; y--) {
-            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;">${y}</div>`;
+            html += `<div style="display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#5b21b6;border:1.5px solid #c4b5fd;">${y}</div>`;
             p.items.forEach((it, i) => {
               const filled = p.values[i] >= y;
-              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#7c3aed;border:1px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
+              html += `<div style="display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#7c3aed;border:1.5px solid #ddd6fe;background:${filled?'#fef3c7':'#fff'};">${filled?'○':''}</div>`;
             });
           }
-          html += `<div style="background:#ede9fe;border:1px solid #c4b5fd;"></div>`;
+          html += `<div style="background:linear-gradient(135deg,#ede9fe,#ddd6fe);border:1.5px solid #c4b5fd;"></div>`;
           p.items.forEach(it => {
-            html += `<div style="display:flex;flex-direction:row;align-items:center;justify-content:center;gap:3px;font-weight:700;font-size:11px;background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;"><span style="font-size:15px;line-height:1">${getEmoji(it)}</span>${it}</div>`;
+            html += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:15px;background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#5b21b6;border:1.5px solid #c4b5fd;"><span style="font-size:26px;line-height:1">${getEmoji(it)}</span>${it}</div>`;
           });
           return html;
         })()}
       </div>
     </div>
   `;
+  
+  // ★ 재디자인: 한 줄 레이아웃으로 마이크 + 텍스트박스 + 버튼들
   document.getElementById('scene').innerHTML = `
-    <div class="record-wrap" style="gap:6px;">
-      <div class="record-question" style="padding:6px 60px; flex-shrink:0;">
-        <h3 style="font-size:17px;">${p.question}</h3>
-        <button class="speak-btn" style="width:38px; height:38px; font-size:18px;" onclick="say(\`${p.question}\`)" title="문제 읽어주기">🔊</button>
+    <div style="display:flex; flex-direction:column; gap:10px; flex:1; min-height:0; overflow:hidden;">
+      
+      <!-- 질문 박스: 더 크게, 더 강조 -->
+      <div style="background:linear-gradient(135deg, #ede9fe, #ddd6fe); padding:14px 70px 14px 28px; border-radius:18px; border:4px solid #a78bfa; text-align:center; flex-shrink:0; position:relative; box-shadow:0 4px 12px rgba(167,139,250,0.2);">
+        <h3 style="font-size:24px; font-weight:700; color:#4c1d95; line-height:1.4;">${p.question}</h3>
+        <button class="speak-btn" onclick="say(\`${p.question}\`)" title="문제 읽어주기" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:#7c3aed; color:#fff; border:none; border-radius:50%; width:48px; height:48px; cursor:pointer; font-size:22px; box-shadow:0 3px 0 #5b21b6;">🔊</button>
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; flex-shrink:0;">${tableHtml}${graphHtml}</div>
-      <div class="record-control" style="gap:2px; flex-shrink:0;">
-        <button class="mic-btn" id="mic-btn" style="width:54px; height:54px; font-size:24px;">🎤</button>
-        <div class="mic-status" id="mic-status" style="font-size:14px;">🎤 마이크를 누르거나 ⌨️ 아래 칸에 직접 적어보세요</div>
+      
+      <!-- 표 + 그래프: 가로로 1:1, 영역 키움 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1.2; min-height:0;">
+        ${tableHtml}
+        ${graphHtml}
       </div>
-      <textarea class="record-text-box" id="rec-text" style="min-height:38px; max-height:50px; padding:8px 12px; font-size:16px; flex-shrink:0;" placeholder="여기에 직접 적거나, 마이크로 말한 내용이 적혀요"></textarea>
-      <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; flex-shrink:0; padding-top:2px;">
-        <div style="display:flex; gap:6px;">
-          <button class="sample-toggle" id="sample-btn-post" style="padding:8px 16px; font-size:16px;">💡 예시 답안</button>
-          <button class="sample-toggle" id="help-btn-post" style="padding:8px 16px; font-size:16px; background:#dbeafe; border-color:#3b82f6; color:#1e40af;">💁 도움받기</button>
+      
+      <!-- 입력 영역: 마이크 + 텍스트박스를 가로로 배치해 공간 효율 -->
+      <div style="display:flex; gap:14px; align-items:stretch; flex-shrink:0;">
+        
+        <!-- 왼쪽: 마이크 버튼 + 안내 -->
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,#fff7ed,#fed7aa); padding:14px 22px; border-radius:18px; border:3px dashed #fb923c; flex-shrink:0;">
+          <button class="mic-btn" id="mic-btn" style="width:80px; height:80px; font-size:36px;">🎤</button>
+          <div class="mic-status" id="mic-status" style="font-size:15px; font-weight:700; color:#9a3412; text-align:center; line-height:1.3; max-width:140px;">마이크를 눌러<br>말해보세요</div>
         </div>
-        <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5; padding:10px 22px; font-size:18px;">학습 전후 비교 📊</button>
+        
+        <!-- 오른쪽: 텍스트박스 + 버튼들 -->
+        <div style="flex:1; display:flex; flex-direction:column; gap:8px; min-width:0;">
+          <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+            <span style="font-size:20px;">⌨️</span>
+            <span style="font-size:16px; font-weight:700; color:#374151;">또는 아래 칸에 직접 적어도 돼요</span>
+          </div>
+          <textarea class="record-text-box" id="rec-text" style="flex:1; min-height:90px; padding:14px 18px; font-size:20px; border-radius:16px; border:3px solid #c4b5fd; resize:none;" placeholder="✏️ 여기에 직접 적거나, 마이크로 말한 내용이 적혀요"></textarea>
+          <div style="display:flex; gap:10px; align-items:center; justify-content:space-between; flex-shrink:0;">
+            <button class="sample-toggle" id="sample-btn" style="padding:10px 20px; font-size:17px;">💡 예시 답안 보기</button>
+            <button class="btn btn-success" id="next-btn" disabled style="opacity:0.5; padding:14px 28px; font-size:20px;">학습 전후 비교 📊</button>
+          </div>
+        </div>
       </div>
+      
+      <div id="sample-area" style="flex-shrink:0;"></div>
     </div>
   `;
+  
   setupRecording('post');
-  document.getElementById('sample-btn-post').addEventListener('click', () => {
-    showSampleModal(p.sample || '예시 답안이 없어요.');
+  
+  // 예시 답안 토글
+  document.getElementById('sample-btn').addEventListener('click', () => {
+    const area = document.getElementById('sample-area');
+    if (area.innerHTML) {
+      area.innerHTML = '';
+    } else {
+      area.innerHTML = `<div class="sample-content" style="font-size:17px; padding:10px 14px;">${p.sample || '예시 답안이 없어요.'}</div>`;
+      say(p.sample || '예시 답안이 없어요.');
+    }
   });
-  document.getElementById('help-btn-post').addEventListener('click', () => {
-    const maxIdx = p.values.indexOf(Math.max(...p.values));
-    const minIdx = p.values.indexOf(Math.min(...p.values));
-    showHelpModal({
-      examples: [
-        `${p.items[maxIdx]}가 ${p.values[maxIdx]}명으로 가장 많아요.`,
-        `${p.items[minIdx]}가 ${p.values[minIdx]}명으로 가장 적어요.`,
-        `표보다 그래프가 한눈에 비교하기 더 쉬워요.`,
-        `우리 반은 모두 ${p.values.reduce((a,b)=>a+b,0)}명이에요.`,
-        `그래프에서 ○가 가장 높이 쌓인 것이 가장 많아요.`
-      ]
-    });
-  });
+  
   document.getElementById('next-btn').addEventListener('click', () => {
     state.done.post = true;
     saveRecordingToServer('사후');
     renderCompare();
   });
+  
   setTimeout(() => say(`${p.question}`), 400);
 }
 
+// ========================
 // 학습 전후 비교 + 자기평가
+// ========================
 function renderCompare() {
   state.phase = 'self';
   updateHeader('📊', '학습 전후 비교', '내 말이 어떻게 달라졌을까요?', 'pink');
   updateStudentTag();
   updateProgress();
-  const playPreText = `say(\`${(state.preText || '녹음한 내용이 없어요').replace(/`/g,'')}\`, {force:true})`;
-  const playPostText = `say(\`${(state.postText || '녹음한 내용이 없어요').replace(/`/g,'')}\`, {force:true})`;
+  
   document.getElementById('scene').innerHTML = `
+    ${tutorialHTML('학습 전과 학습 후 내가 말한 것을 비교해보세요. 별점도 매겨봐요!')}
     <div class="compare-wrap">
       <div class="compare-card before">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-          <div class="compare-label">📍 학습 전 (사전 말하기)</div>
-          <button onclick="${playPreText}" style="background:#ef4444; color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; font-size:20px; box-shadow:0 3px 0 #991b1b;">🔊</button>
-        </div>
+        <div class="compare-label">📍 학습 전 (사전 말하기)</div>
         <div class="compare-text">${state.preText || '(녹음한 내용이 없어요)'}</div>
       </div>
       <div class="compare-card after">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-          <div class="compare-label">🌱 학습 후 (사후 말하기)</div>
-          <button onclick="${playPostText}" style="background:#10b981; color:#fff; border:none; border-radius:50%; width:42px; height:42px; cursor:pointer; font-size:20px; box-shadow:0 3px 0 #047857;">🔊</button>
-        </div>
+        <div class="compare-label">🌱 학습 후 (사후 말하기)</div>
         <div class="compare-text">${state.postText || '(녹음한 내용이 없어요)'}</div>
       </div>
-      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:18px; padding:16px 22px; border:3px solid #f59e0b;">
-        <h3 style="font-size:21px; font-weight:700; color:#78350f; margin-bottom:8px; text-align:center;">⭐ 자기평가 ⭐</h3>
-        <p style="font-size:17px; font-weight:700; color:#451a03; margin-bottom:10px; text-align:center;">
-          내가 말한 내용을 들어보고, 별점을 매겨보세요!<br>
-          <span style="font-size:14px; color:#92400e;">(녹음 옆 🔊 버튼을 눌러 다시 들을 수 있어요)</span>
-        </p>
+      <div style="background:linear-gradient(135deg,#fef3c7,#fde68a); border-radius:16px; padding:18px; border:3px solid #f59e0b; text-align:center;">
+        <h3 style="font-size:20px; font-weight:900; color:#78350f; margin-bottom:8px;">⭐ 자기평가 ⭐</h3>
+        <p style="font-size:15px; font-weight:800; color:#451a03; margin-bottom:12px;">오늘 활동을 잘 했다고 생각하나요? 별을 눌러주세요!</p>
         <div class="stars-row" id="stars-row">
           ${[1,2,3,4,5].map(n => `<button class="star-btn" data-n="${n}">⭐</button>`).join('')}
         </div>
-        <div id="star-feedback" style="margin-top:10px; font-weight:700; font-size:17px; color:#78350f; text-align:center; min-height:30px;"></div>
+        <div id="star-feedback" style="margin-top:10px; font-weight:800; font-size:16px; color:#78350f;"></div>
       </div>
     </div>
   `;
+  
   document.querySelectorAll('.star-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const n = parseInt(btn.dataset.n);
@@ -2120,15 +2278,13 @@ function renderCompare() {
       document.querySelectorAll('.star-btn').forEach((b, i) => {
         if (i < n) b.classList.add('lit'); else b.classList.remove('lit');
       });
+      
       const fb = document.getElementById('star-feedback');
       if (n <= 3) {
-        fb.innerHTML = `별 ${n}개! 다시 한 번 도전하면 더 잘할 수 있어요!<br>
-          <div style="display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap;">
-            <button class="btn btn-warn btn-sm" id="reactivity-btn">🔄 활동 다시하기</button>
-            <button class="btn btn-pink btn-sm" id="rerecord-btn">🎤 사후 말하기 다시</button>
-            <button class="btn btn-success btn-sm" id="finish-btn">📜 그래도 마치기</button>
-          </div>`;
-        document.getElementById('reactivity-btn').addEventListener('click', () => {
+        fb.innerHTML = `별 ${n}개! 한 번 더 도전해보면 더 잘할 수 있어요!<br>
+          <button class="btn btn-warn btn-sm" id="retry-btn" style="margin-top:10px;">🔄 다시 도전하기</button>
+          <button class="btn btn-success btn-sm" id="finish-btn" style="margin-top:10px;">📜 그래도 마치기</button>`;
+        document.getElementById('retry-btn').addEventListener('click', () => {
           state.retried = true;
           state.done.act1 = state.done.act2 = state.done.act3 = state.done.act4 = state.done.act5 = false;
           state.done.quiz = state.done.post = false;
@@ -2136,44 +2292,34 @@ function renderCompare() {
           state.quizIdx = 0; state.quizAnswers = [];
           renderActivity1();
         });
-        document.getElementById('rerecord-btn').addEventListener('click', () => {
-          state.retried = true;
-          state.done.post = false;
-          state.postText = ''; state.postAudio = '';
-          renderPostRecord();
-        });
         document.getElementById('finish-btn').addEventListener('click', renderCertificate);
-        say(`별 ${n}개를 줬군요. 활동을 다시 하거나, 사후 말하기만 다시 녹음하거나, 그대로 마칠 수 있어요.`);
+        say(`별 ${n}개를 줬군요. 한 번 더 도전해 보거나, 그대로 마칠 수 있어요.`);
       } else {
-        fb.innerHTML = `🎉 별 ${n}개! 정말 잘했어요!<br>
-          <div style="display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap;">
-            <button class="btn btn-pink btn-sm" id="rerecord-btn">🎤 사후 말하기 다시</button>
-            <button class="btn btn-success btn-sm" id="finish-btn">📜 수료증 받기</button>
-          </div>`;
-        document.getElementById('rerecord-btn').addEventListener('click', () => {
-          state.retried = true;
-          state.done.post = false;
-          state.postText = ''; state.postAudio = '';
-          renderPostRecord();
-        });
+        fb.innerHTML = `🎉 별 ${n}개! 정말 잘했어요! 수료증을 받으러 가요!<br>
+          <button class="btn btn-pink btn-sm" id="finish-btn" style="margin-top:10px;">📜 수료증 받기</button>`;
         document.getElementById('finish-btn').addEventListener('click', renderCertificate);
-        say(`와! 별 ${n}개! 정말 잘했어요. 더 잘 말하고 싶으면 다시 녹음할 수도 있고, 수료증을 받으러 갈 수도 있어요.`);
+        say(`와! 별 ${n}개! 정말 잘했어요. 수료증을 받으러 가요!`);
       }
       playSound('cheer');
     });
   });
-  setTimeout(() => say('학습 전과 학습 후에 말한 내용을 비교해보세요. 옆의 스피커 버튼을 누르면 다시 들을 수 있어요. 그리고 자기평가 별을 눌러주세요.'), 400);
+  
+  setTimeout(() => say('학습 전과 후를 비교해보세요. 그리고 자기평가 별을 눌러주세요.'), 400);
 }
 
-// 수료증 (★ helpUsed 전송 추가)
+// ========================
+// 수료증
+// ========================
 function renderCertificate() {
   state.phase = 'cert';
   updateHeader('🏆', '수료증', '오늘 학습을 마쳤어요!', 'pink');
   updateStudentTag();
   updateProgress();
+  
   const correctCount = state.quizAnswers.filter(x=>x).length;
   const duration = Math.round((Date.now() - state.startTime) / 60000);
   const today = new Date();
+  
   document.getElementById('scene').innerHTML = `
     <div class="cert-wrap">
       <div class="cert" id="cert-content">
@@ -2200,27 +2346,42 @@ function renderCertificate() {
       </div>
     </div>
   `;
+  
   document.getElementById('save-btn').addEventListener('click', async () => {
     const certEl = document.getElementById('cert-content');
     const saveBtn = document.getElementById('save-btn');
     saveBtn.disabled = true;
     saveBtn.textContent = '저장 중...';
+    
     try {
-      const canvas = await html2canvas(certEl, { backgroundColor: '#fffbeb', scale: 2, useCORS: true });
+      const canvas = await html2canvas(certEl, {
+        backgroundColor: '#fffbeb',
+        scale: 2,
+        useCORS: true
+      });
+      
       const link = document.createElement('a');
       link.download = `수료증_${state.student.name}_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
+      
       saveBtn.textContent = '✅ 저장 완료!';
       playSound('cheer');
       say('수료증을 저장했어요!');
-      setTimeout(() => { saveBtn.textContent = '💾 수료증 저장'; saveBtn.disabled = false; }, 2000);
+      setTimeout(() => {
+        saveBtn.textContent = '💾 수료증 저장';
+        saveBtn.disabled = false;
+      }, 2000);
     } catch (err) {
       console.error('수료증 저장 실패:', err);
       saveBtn.textContent = '⚠️ 저장 실패';
-      setTimeout(() => { saveBtn.textContent = '💾 수료증 저장'; saveBtn.disabled = false; }, 2000);
+      setTimeout(() => {
+        saveBtn.textContent = '💾 수료증 저장';
+        saveBtn.disabled = false;
+      }, 2000);
     }
   });
+  
   const correct = state.quizAnswers;
   callAPI('saveResult', {
     studentNum: state.student.num,
@@ -2229,25 +2390,26 @@ function renderCertificate() {
     activity3: state.done.act3, activity4: state.done.act4, activity5: state.done.act5,
     quiz1: correct[0] || false, quiz2: correct[1] || false, quiz3: correct[2] || false,
     selfStars: state.selfStars, retried: state.retried,
-    helpUsed: state.helpUsed,
     duration: duration
   });
+  
   document.getElementById('restart-btn').addEventListener('click', () => {
     Object.keys(state.done).forEach(k => state.done[k] = false);
     state.student = null;
     state.classifyData = {}; state.tableData = {}; state.vertGraph = {}; state.horizGraph = {};
     state.quizIdx = 0; state.quizAnswers = [];
     state.preText = ''; state.postText = ''; state.selfStars = 0; state.retried = false;
-    state.helpUsed = 0;
     state.startTime = Date.now();
     renderIntro();
   });
-  rewardFireworks();
-  setTimeout(() => { rewardBig(`${state.student.name} 박사님!`, '🏆'); }, 600);
-  setTimeout(() => say(`축하해요! ${state.student.name} 친구! 오늘 정말 멋지게 그림그래프를 배웠어요. 수료증을 받았어요!`), 1200);
+  
+  playSound('cheer');
+  setTimeout(() => say(`축하해요! ${state.student.name} 친구! 오늘 정말 멋지게 그림그래프를 배웠어요. 수료증을 받았어요!`), 600);
 }
 
+// ========================
 // 시작
+// ========================
 window.addEventListener('DOMContentLoaded', init);
 window.addEventListener('load', () => { fitStage(); tts.init(); });
 </script>
