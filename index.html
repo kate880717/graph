@@ -785,9 +785,9 @@ function setDefaultData() {
       showGraph: true
     },
     quizzes: [
-      { q: '그래프에서 가장 많은 항목을 한눈에 알 수 있는 곳은?', options: ['○가 가장 높이 쌓인 곳', '○가 가장 적은 곳'], ans: 1, desc: '맞아요! ○가 가장 높이 쌓인 곳이 가장 많은 항목이에요.' },
-      { q: '표와 그래프 중 한눈에 비교하기 더 좋은 것은?', options: ['숫자가 적힌 표', '그림이 그려진 그래프'], ans: 2, desc: '딩동댕! 그래프는 그림의 높이만 봐도 누가 가장 많은지 한눈에 알 수 있어요.' },
-      { q: '그래프를 그릴 때 한 칸에는 ○를 몇 개 그릴까요?', options: ['한 개', '두 개'], ans: 1, desc: '정답이에요! 한 칸에는 ○를 한 개씩만 그려야 정확하게 비교할 수 있어요.' }
+      { q: '그래프에서 가장 많은 항목을 한눈에 알 수 있는 곳은?', options: ['○가 가장 높이 쌓인 곳', '○가 가장 적은 곳'], ans: 1, desc: '맞아요! ○가 가장 높이 쌓인 곳이 가장 많은 항목이에요.', wrongDesc: '다시 생각해 봐요! ○가 적은 곳은 학생 수가 적은 곳이에요. 가장 많은 항목은 ○가 가장 높이 쌓인 곳이랍니다.' },
+      { q: '표와 그래프 중 한눈에 비교하기 더 좋은 것은?', options: ['숫자가 적힌 표', '그림이 그려진 그래프'], ans: 2, desc: '딩동댕! 그래프는 그림의 높이만 봐도 누가 가장 많은지 한눈에 알 수 있어요.', wrongDesc: '아쉬워요! 표는 정확한 숫자를 보여주지만, 한눈에 비교하기는 그림으로 그려진 그래프가 더 좋답니다.' },
+      { q: '그래프를 그릴 때 한 칸에는 ○를 몇 개 그릴까요?', options: ['한 개', '두 개'], ans: 1, desc: '정답이에요! 한 칸에는 ○를 한 개씩만 그려야 정확하게 비교할 수 있어요.', wrongDesc: '아쉬워요! 한 칸에 두 개를 그리면 셀 때 헷갈려요. 한 칸에는 꼭 ○를 한 개씩만 그려야 정확하게 비교할 수 있어요.' }
     ]
   };
   state.students = [
@@ -2071,7 +2071,9 @@ function showQuizQuestion() {
       const sel = parseInt(btn.dataset.idx);
       const correct = sel === q.ans;
       state.quizAnswers.push(correct);
-      showQuizFeedback(correct, q.desc);
+      // 정답이면 desc, 오답이면 wrongDesc(없으면 fallback) 전달
+      const message = correct ? q.desc : (q.wrongDesc || '아쉬워요. 다시 한 번 생각해 봐요!');
+      showQuizFeedback(correct, message);
     });
   });
   
@@ -2081,7 +2083,8 @@ function showQuizQuestion() {
 function showQuizFeedback(correct, desc) {
   if (correct) playSound('cheer');
   else playSound('wrong');
-  say(correct ? '정답이에요! ' + desc : '아쉬워요. ' + desc);
+  // 정답/오답 안내 음성 (desc는 이미 상황에 맞는 메시지가 전달됨)
+  say(correct ? ('정답이에요! ' + desc) : desc);
   
   const overlay = document.createElement('div');
   overlay.className = 'modal-bg';
